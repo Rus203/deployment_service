@@ -1,11 +1,15 @@
 /deployment_back/node_modules
 /deployment_back/dist
+/deployment_back/*.env
 
 /deployment_front/node_modules
 /deployment_front/dist
+/deployment_front/*.env
 
 /mini_back/node_modules
 /mini_back/dist
+/mini_back/*.env
+
 
 # IDE - VSCode
 .vscode/*
