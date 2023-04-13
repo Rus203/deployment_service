@@ -1,0 +1,15 @@
+/deployment_back/node_modules
+/deployment_back/dist
+
+/deployment_front/node_modules
+/deployment_front/dist
+
+/mini_back/node_modules
+/mini_back/dist
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
