@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
+import { RefreshToken } from 'src/refresh-token/refresh-token.entity';
 
 const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -8,7 +9,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB,
-  entities: [User],
+  entities: [User, RefreshToken],
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
 };
 

@@ -6,10 +6,15 @@ import {
   Delete,
   Query,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+
+// for development. I'll remove it later
 
 @Controller('user')
 export class UserController {
@@ -20,9 +25,11 @@ export class UserController {
     return await this.userService.findAll(getUserDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.userService.findOne(id);
+    return await this.userService.findOne({ id });
   }
 
   @Patch(':id')
@@ -35,3 +42,4 @@ export class UserController {
     return await this.userService.remove(id);
   }
 }
+
