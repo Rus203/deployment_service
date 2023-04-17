@@ -6,8 +6,9 @@ import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { AuthModule } from './auth/auth.module';
 import { AccessTokenModule } from './access-token/access-token.module';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
-import typeOrmConfig from './configs/type-orm.config';
-import { redisConfig } from './configs/redis.config';
+import { typeOrmConfig } from './configs';
+import { redisConfig } from './configs';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { redisConfig } from './configs/redis.config';
     AuthModule,
     AccessTokenModule,
     RedisModule,
+    ProjectModule,
   ],
   controllers: [],
   providers: [],
