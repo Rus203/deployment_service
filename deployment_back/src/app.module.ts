@@ -9,6 +9,8 @@ import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { typeOrmConfig } from './configs';
 import { redisConfig } from './configs';
 import { ProjectModule } from './project/project.module';
+import { SSHModule } from './ssh/ssh.module';
+import { FileEncryptorModule } from './file-encryptor/files-encryptor.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { ProjectModule } from './project/project.module';
     AccessTokenModule,
     RedisModule,
     ProjectModule,
+    SSHModule,
+    FileEncryptorModule,
   ],
   controllers: [],
   providers: [],

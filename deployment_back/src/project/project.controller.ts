@@ -55,6 +55,10 @@ export class ProjectController {
     },
   ) {
     const owner = req.user;
+    console.log(envFile);
+    console.log(sshServerPrivateKey);
+    console.log(sshGitPrivateKeyProject);
+    console.log(sshGitPublicKeyProject);
     return await this.projectService.create(
       createProjectDto,
       envFile[0].path,
@@ -68,6 +72,11 @@ export class ProjectController {
   @Get()
   findAll(@Param() getProjectDto: GetProjectDto) {
     return this.projectService.findAll(getProjectDto);
+  }
+
+  @Get('/deploy/:id')
+  async deployProject(@Param('id') id: string) {
+    return this.projectService.deploy(id);
   }
 
   @Get(':id')
