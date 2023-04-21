@@ -9,7 +9,7 @@ import { AuthSignInDto } from './dto/auth-sign-in.dto';
 import { AuthRefreshDto } from './dto/auth-refresh.dto';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { AccessTokenService } from 'src/access-token/access-token.service';
 

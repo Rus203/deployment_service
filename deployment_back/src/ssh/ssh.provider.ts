@@ -17,15 +17,16 @@ export class SshProvider extends ChildProcessCommandProvider {
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const remoteFullPath = sshLink + ':' + remoteDirectory;
-
-      console.log('sshLink(serverUrl)', sshLink);
-      console.log('pathToSSH', pathToSSHPrivateKey);
-      console.log('localDirectory', localDirectory);
-      console.log('remoteDirectory', remoteDirectory);
-
       const childProcess = spawn(
         'scp',
-        ['-i', pathToSSHPrivateKey, '-r', localDirectory, remoteFullPath],
+        [
+          // '-o StrictHostKeyChecking=no',
+          '-i',
+          pathToSSHPrivateKey,
+          '-r',
+          localDirectory,
+          remoteFullPath,
+        ],
         {
           shell: true,
         },

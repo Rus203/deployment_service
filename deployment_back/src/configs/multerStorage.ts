@@ -1,7 +1,7 @@
-import * as crypto from 'node:crypto';
+import crypto from 'node:crypto';
 import { diskStorage } from 'multer';
 import { Request } from 'express';
-import * as path from 'node:path';
+import path from 'node:path';
 
 const srcPath = path.join(__dirname, '..');
 

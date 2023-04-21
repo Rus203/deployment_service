@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import * as path from 'node:path';
+import path from 'node:path';
 import {
   rm,
   createReadStream,
@@ -19,12 +19,11 @@ import { pipeline } from 'node:stream';
 @Injectable()
 export class FileEncryptorProvider implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
-    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-keys');
+    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-key');
     const miniBackPrivateKey = path.join(commonFolder, 'id_rsa');
-    const miniBackPublicKey = path.join(commonFolder, 'id_rsa.pub');
 
-    if (existsSync(miniBackPrivateKey) && existsSync(miniBackPublicKey)) {
-      await this.encryptFilesOnPlace([miniBackPublicKey, miniBackPrivateKey]);
+    if (existsSync(miniBackPrivateKey)) {
+      await this.encryptFilesOnPlace([miniBackPrivateKey]);
       await this.removeUnencryptedFiles(commonFolder);
     }
   }
@@ -34,7 +33,7 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
     writeStream: WriteStream,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      crypto.scrypt(process.env.SECRETE_KEY, 'salt', 24, (err, key) => {
+      crypto.scrypt(process.env.SECRET_KEY, 'salt', 24, (err, key) => {
         if (err) reject(err);
         const iv = Buffer.alloc(16, 0);
 
@@ -56,7 +55,7 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
     writeStream: WriteStream,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      crypto.scrypt(process.env.SECRETE_KEY, 'salt', 24, (err, key) => {
+      crypto.scrypt(process.env.SECRET_KEY, 'salt', 24, (err, key) => {
         if (err) reject(err);
 
         const iv = Buffer.alloc(16, 0);
@@ -139,7 +138,6 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
       const files = await readdir(filesPath);
 
       for (const file of files) {
-        console.log('files', files);
         if (path.extname(file) !== '.enc') {
           rmSync(path.join(filesPath, file), { force: true });
         }

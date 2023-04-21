@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as os from 'os';
+import os from 'os';
 
 @Injectable()
 export class ServerService {

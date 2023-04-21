@@ -9,8 +9,7 @@ import { User } from 'src/user/user.entity';
 import { normalizeProjectName } from 'src/utils';
 import { SshProvider } from 'src/ssh/ssh.provider';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
-import * as path from 'path';
-import * as fs from 'fs/promises';
+import path from 'path';
 
 @Injectable()
 export class ProjectService {
@@ -29,6 +28,19 @@ export class ProjectService {
     owner: User,
   ) {
     createProjectDto.name = normalizeProjectName(createProjectDto.name);
+
+    await this.fileEncryptorProvider.encryptFilesOnPlace([
+      sshServerPrivateKeyPath,
+      sshGitPrivateKeyProjectPath,
+      sshGitPublicKeyProjectPath,
+      envFilePath,
+    ]);
+
+    sshServerPrivateKeyPath = sshServerPrivateKeyPath + '.enc';
+    sshGitPrivateKeyProjectPath = sshGitPrivateKeyProjectPath + '.enc';
+    sshGitPublicKeyProjectPath = sshGitPublicKeyProjectPath + '.enc';
+    envFilePath = envFilePath + '.enc';
+
     const newProject = this.projectRepository.create({
       ...createProjectDto,
       envFilePath,
@@ -37,13 +49,6 @@ export class ProjectService {
       sshGitPublicKeyProjectPath,
       userId: owner.id,
     });
-
-    await this.fileEncryptorProvider.encryptFilesOnPlace([
-      sshServerPrivateKeyPath,
-      sshGitPrivateKeyProjectPath,
-      sshGitPublicKeyProjectPath,
-      envFilePath,
-    ]);
 
     return this.projectRepository.save(newProject);
   }
@@ -66,69 +71,39 @@ export class ProjectService {
 
   async deploy(id: string) {
     const project = await this.projectRepository.findOneBy({ id });
-    console.log(project);
     const rootDirectory = path.join(__dirname, '..', '..');
 
-    // await this.fileEncryptorProvider.decryptFilesOnPlace([sshFile, envFile]);
-    // const envFileContent = await fs.readFile(envFile.replace(/.enc$/, ''));
-    // await fs.writeFile(path.join(project.uploadPath, '.env'), envFileContent);
-
-    const miniBackPrivateKey = path.join(
+    let miniBackPrivateKey = path.join(
       rootDirectory,
-      'mini-back-keys',
-      'id_rsa',
+      'mini-back-key',
+      'id_rsa.enc',
     );
 
-    const miniBackPublicKey = path.join(
-      rootDirectory,
-      'mini-back-keys',
-      'id_rsa.pub',
-    );
+    let serverPrivateKey = project.sshServerPrivateKeyPath;
 
     await this.fileEncryptorProvider.decryptFilesOnPlace([
-      miniBackPublicKey,
       miniBackPrivateKey,
+      serverPrivateKey,
     ]);
 
-    miniBackPublicKey.replace(/.enc$/, '');
-    miniBackPrivateKey.replace(/.enc$/, '');
+    miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
+    serverPrivateKey = serverPrivateKey.replace(/.enc$/, '');
 
     await this.sshProvider.putDirectoryToRemoteServer(
       {
         sshLink: project.serverUrl,
-        pathToSSHPrivateKey: project.sshServerPrivateKeyPath,
+        pathToSSHPrivateKey: serverPrivateKey,
       },
-      path.join(rootDirectory, 'mini-back-keys'),
-      '.',
+      path.join(rootDirectory, 'mini-back-key'),
+      '/root/mini_back',
     );
 
     console.log('check mini_back');
     await this.fileEncryptorProvider.encryptFilesOnPlace(
-      [miniBackPublicKey, miniBackPrivateKey].map((path) =>
+      [miniBackPrivateKey, serverPrivateKey].map((path) =>
         path.replace(/.enc$/, ''),
       ),
     );
-
-    // await this.sshProvider.putDirectoryToRemoteServer(
-    //   {
-    //     sshLink: project.sshServerUrl,
-    //     pathToSSHPrivateKey: project.sshFile,
-    //   },
-    //   project.uploadPath,
-    //   'mini_back/project',
-    // );
-
-    // console.log('MiniBack placed');
-
-    // await this.sshProvider.runMiniBack(
-    //   {
-    //     sshLink: project.sshServerUrl,
-    //     pathToSSHPrivateKey: project.sshFile,
-    //   },
-    //   'mini_back',
-    // );
-
-    // console.log('MiniBack runned');
 
     return 'ok';
   }

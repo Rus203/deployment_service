@@ -55,10 +55,10 @@ export class ProjectController {
     },
   ) {
     const owner = req.user;
-    console.log(envFile);
-    console.log(sshServerPrivateKey);
-    console.log(sshGitPrivateKeyProject);
-    console.log(sshGitPublicKeyProject);
+    // console.log(envFile);
+    // console.log(sshServerPrivateKey);
+    // console.log(sshGitPrivateKeyProject);
+    // console.log(sshGitPublicKeyProject);
     return await this.projectService.create(
       createProjectDto,
       envFile[0].path,
