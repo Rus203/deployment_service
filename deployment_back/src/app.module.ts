@@ -14,9 +14,9 @@ import { FileEncryptorModule } from './file-encryptor/files-encryptor.module';
 
 @Module({
   imports: [
-    UserModule,
     TypeOrmModule.forRoot(typeOrmConfig),
     RedisModule.forRoot(redisConfig),
+    UserModule,
     ServerModule,
     RefreshTokenModule,
     AuthModule,
