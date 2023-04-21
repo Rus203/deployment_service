@@ -55,10 +55,6 @@ export class ProjectController {
     },
   ) {
     const owner = req.user;
-    // console.log(envFile);
-    // console.log(sshServerPrivateKey);
-    // console.log(sshGitPrivateKeyProject);
-    // console.log(sshGitPublicKeyProject);
     return await this.projectService.create(
       createProjectDto,
       envFile[0].path,
@@ -76,7 +72,12 @@ export class ProjectController {
 
   @Get('/deploy/:id')
   async deployProject(@Param('id') id: string) {
-    return this.projectService.deploy(id);
+    return await this.projectService.deployMiniBackOfProjectId(id);
+  }
+
+  @Get('/run/:id')
+  async RunProject(@Param('id') id: string) {
+    return this.projectService.runMiniBackOfProjectId(id);
   }
 
   @Get(':id')

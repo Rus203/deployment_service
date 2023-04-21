@@ -19,14 +19,7 @@ export class SshProvider extends ChildProcessCommandProvider {
       const remoteFullPath = sshLink + ':' + remoteDirectory;
       const childProcess = spawn(
         'scp',
-        [
-          // '-o StrictHostKeyChecking=no',
-          '-i',
-          pathToSSHPrivateKey,
-          '-r',
-          localDirectory,
-          remoteFullPath,
-        ],
+        ['-i', pathToSSHPrivateKey, '-r', localDirectory, remoteFullPath],
         {
           shell: true,
         },
@@ -64,16 +57,20 @@ export class SshProvider extends ChildProcessCommandProvider {
 
   public runMiniBack(
     { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
-    pathToMiniBack: string,
+    gitProjectLink: string,
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const childProcess = spawn(
         'ssh',
         [
+          '-T',
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          `"cd ${pathToMiniBack} && npm run npm:install && npm run pm2:start"`,
+          'eval $(ssh-agent -s); cd ~/mini_back;' +
+            'chmod 600 id_rsa;' +
+            'ssh-add id_rsa;' +
+            `git clone ${gitProjectLink}`,
         ],
         {
           shell: true,
