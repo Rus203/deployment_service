@@ -55,8 +55,9 @@ export class SshProvider extends ChildProcessCommandProvider {
     });
   }
 
-  public runMiniBack(
+  public pullMiniBack(
     { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    nameRemoteRepository: string,
     gitProjectLink: string,
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -67,10 +68,37 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'eval $(ssh-agent -s); cd ~/mini_back;' +
+          'eval $(ssh-agent -s);' +
+            `cd ~/${nameRemoteRepository};` +
             'chmod 600 id_rsa;' +
             'ssh-add id_rsa;' +
             `git clone ${gitProjectLink}`,
+        ],
+        {
+          shell: true,
+        },
+      );
+
+      this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
+
+  runMiniBack(
+    { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    nameRemoteRepository: string,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const childProcess = spawn(
+        'ssh',
+        [
+          '-T',
+          sshLink,
+          '-i',
+          pathToSSHPrivateKey,
+          `cd ~/${nameRemoteRepository}/mini_back;` +
+            'ls;' +
+            'npm run npm:install;' +
+            'npm run pm2:start;',
         ],
         {
           shell: true,

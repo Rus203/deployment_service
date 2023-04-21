@@ -75,7 +75,7 @@ export class ProjectService {
     return this.projectRepository.delete({ id });
   }
 
-  async deployMiniBackOfProjectId(id: string) {
+  async placeMiniBakeByProjectId(id: string) {
     const rootDirectory = path.join(__dirname, '..', '..');
     const project = await this.projectRepository.findOneBy({ id });
 
@@ -105,18 +105,38 @@ export class ProjectService {
     miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
     sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
 
+    const nameRemoteRepository = 'project';
     try {
+      // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
         {
           sshLink: project.serverUrl,
           pathToSSHPrivateKey: sshServerPrivateKeyPath,
         },
         path.join(rootDirectory, 'mini-back-key'),
-        path.join('root', 'mini_back'),
+        nameRemoteRepository,
+      );
+
+      // pull mini back from github repo
+      await this.sshProvider.pullMiniBack(
+        {
+          sshLink: project.serverUrl,
+          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+        },
+        nameRemoteRepository,
+        project.gitProjectLink,
+      );
+
+      await this.sshProvider.runMiniBack(
+        {
+          sshLink: project.serverUrl,
+          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+        },
+        nameRemoteRepository,
       );
     } catch {
       throw new BadRequestException(
-        'Set up private key and url of mini back correctly',
+        'Set up private key, url of mini back and ssh git link correctly',
       );
     } finally {
       await this.fileEncryptorProvider.encryptFilesOnPlace(
@@ -128,42 +148,4 @@ export class ProjectService {
 
     return 'success';
   }
-
-  async runMiniBackOfProjectId(id: string) {
-    const project = await this.projectRepository.findOneBy({ id });
-
-    if (project === null) {
-      throw new BadRequestException("The project wasn't found");
-    }
-
-    const gitProjectLink = project.gitProjectLink;
-    let sshServerPrivateKeyPath = project.sshServerPrivateKeyPath;
-    await this.fileEncryptorProvider.decryptFilesOnPlace([
-      sshServerPrivateKeyPath,
-    ]);
-
-    sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
-
-    try {
-      await this.sshProvider.runMiniBack(
-        {
-          sshLink: project.serverUrl,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
-        },
-        gitProjectLink,
-      );
-    } catch (error) {
-      throw new BadRequestException(
-        'Set up url and ssh git link of project correctly',
-      );
-    }
-
-    await this.fileEncryptorProvider.encryptFilesOnPlace(
-      sshServerPrivateKeyPath.replace(/.enc$/, ''),
-    );
-
-    return 'success';
-  }
-
-  
 }

@@ -72,12 +72,7 @@ export class ProjectController {
 
   @Get('/deploy/:id')
   async deployProject(@Param('id') id: string) {
-    return await this.projectService.deployMiniBackOfProjectId(id);
-  }
-
-  @Get('/run/:id')
-  async RunProject(@Param('id') id: string) {
-    return this.projectService.runMiniBackOfProjectId(id);
+    return await this.projectService.placeMiniBakeByProjectId(id);
   }
 
   @Get(':id')
