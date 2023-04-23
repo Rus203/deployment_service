@@ -121,7 +121,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'pm2 delete all; rm -r ~/mini_back',
+          `pm2 delete all; rm -r ~/${nameRemoteRepository}`,
         ],
         {
           shell: true,

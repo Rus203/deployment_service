@@ -1,12 +1,4 @@
-import { RefreshToken } from 'src/refresh-token/refresh-token.entity';
-import { User } from 'src/user/user.entity';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  JoinColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('projects')
 export class Project {
@@ -36,13 +28,6 @@ export class Project {
 
   @Column({ length: 2047, name: 'server_url' })
   serverUrl: string;
-
-  @ManyToOne(() => User, (user) => user.project, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 
   @Column({ name: 'user_id' })
   userId: string;

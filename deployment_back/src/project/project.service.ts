@@ -5,11 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from '../project/project.entity';
 import { Repository } from 'typeorm';
 import { GetProjectDto } from './dto/get-project.dto';
-import { User } from 'src/user/user.entity';
 import { normalizeProjectName } from 'src/utils';
 import { SshProvider } from 'src/ssh/ssh.provider';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
-import { MiniBackProvider } from 'src/mini-back/mini-back.provider';
+import { MiniBackService } from 'src/mini-back/mini-back.service';
 
 @Injectable()
 export class ProjectService {
@@ -17,7 +16,7 @@ export class ProjectService {
     @InjectRepository(Project) private projectRepository: Repository<Project>,
     private sshProvider: SshProvider,
     private fileEncryptorProvider: FileEncryptorProvider,
-    private miniBackProvider: MiniBackProvider,
+    private miniBackService: MiniBackService,
   ) {}
 
   async create(
@@ -26,7 +25,6 @@ export class ProjectService {
     sshServerPrivateKeyPath: string,
     sshGitPrivateKeyProjectPath: string,
     sshGitPublicKeyProjectPath: string,
-    owner: User,
   ) {
     createProjectDto.name = normalizeProjectName(createProjectDto.name);
 
@@ -48,7 +46,6 @@ export class ProjectService {
       sshServerPrivateKeyPath,
       sshGitPrivateKeyProjectPath,
       sshGitPublicKeyProjectPath,
-      userId: owner.id,
     });
 
     return this.projectRepository.save(newProject);
@@ -61,15 +58,15 @@ export class ProjectService {
       throw new NotFoundException("That project was't found");
     }
 
-    const status = await this.miniBackProvider.pingMiniBack(project.serverUrl);
+    const status = await this.miniBackService.pingMiniBack(project.serverUrl);
 
     if (!status) {
-      const { serverUrl, sshServerPrivateKeyPath, gitProjectLink } = project;
-      await this.miniBackProvider.placeMiniBake({
-        serverUrl,
-        sshServerPrivateKeyPath,
-        gitProjectLink,
-      });
+      // const { serverUrl, sshServerPrivateKeyPath, gitProjectLink } = project;
+      // await this.miniBackService.placeMiniBake({
+      //   serverUrl,
+      //   sshServerPrivateKeyPath,
+      //   gitProjectLink,
+      // });
     }
 
     return 'success';

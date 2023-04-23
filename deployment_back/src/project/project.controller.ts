@@ -6,7 +6,6 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  Req,
   UploadedFiles,
   UseGuards,
 } from '@nestjs/common';
@@ -37,7 +36,6 @@ export class ProjectController {
     ),
   )
   async create(
-    @Req() req,
     @Body() createProjectDto: CreateProjectDto,
     @UploadedFiles()
     {
@@ -52,14 +50,12 @@ export class ProjectController {
       sshGitPublicKeyProject?: Express.Multer.File[];
     },
   ) {
-    const owner = req.user;
     return await this.projectService.create(
       createProjectDto,
       envFile[0].path,
       sshServerPrivateKey[0].path,
       sshGitPrivateKeyProject[0].path,
       sshGitPublicKeyProject[0].path,
-      owner,
     );
   }
 

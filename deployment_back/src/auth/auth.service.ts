@@ -25,7 +25,7 @@ export class AuthService {
     const user: User = await this.userService.findOne({ email });
 
     if (user) {
-      throw new ConflictException('There is already such a login here');
+      throw new ConflictException('Such email has already here');
     }
 
     dto.password = await bcrypt.hash(dto.password, 10);
