@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,8 +9,7 @@ import { User } from 'src/user/user.entity';
 import { normalizeProjectName } from 'src/utils';
 import { SshProvider } from 'src/ssh/ssh.provider';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
-import path from 'path';
-import fs from 'fs';
+import { MiniBackProvider } from 'src/mini-back/mini-back.provider';
 
 @Injectable()
 export class ProjectService {
@@ -23,6 +17,7 @@ export class ProjectService {
     @InjectRepository(Project) private projectRepository: Repository<Project>,
     private sshProvider: SshProvider,
     private fileEncryptorProvider: FileEncryptorProvider,
+    private miniBackProvider: MiniBackProvider,
   ) {}
 
   async create(
@@ -59,6 +54,27 @@ export class ProjectService {
     return this.projectRepository.save(newProject);
   }
 
+  async deploy(projectId: string) {
+    const project = await this.findOne(projectId);
+
+    if (project === null) {
+      throw new NotFoundException("That project was't found");
+    }
+
+    const status = await this.miniBackProvider.pingMiniBack(project.serverUrl);
+
+    if (!status) {
+      const { serverUrl, sshServerPrivateKeyPath, gitProjectLink } = project;
+      await this.miniBackProvider.placeMiniBake({
+        serverUrl,
+        sshServerPrivateKeyPath,
+        gitProjectLink,
+      });
+    }
+
+    return 'success';
+  }
+
   async findAll(getProjectDto: GetProjectDto) {
     return this.projectRepository.findBy(getProjectDto);
   }
@@ -73,79 +89,5 @@ export class ProjectService {
 
   remove(id: string) {
     return this.projectRepository.delete({ id });
-  }
-
-  async placeMiniBakeByProjectId(id: string) {
-    const rootDirectory = path.join(__dirname, '..', '..');
-    const project = await this.projectRepository.findOneBy({ id });
-
-    if (project === null) {
-      throw new NotFoundException("That project was't found");
-    }
-
-    let miniBackPrivateKey = path.join(
-      rootDirectory,
-      'mini-back-key',
-      'id_rsa.enc',
-    );
-
-    if (!fs.existsSync(miniBackPrivateKey)) {
-      throw new InternalServerErrorException(
-        "Secret key of mini back wasn't provide",
-      );
-    }
-
-    let sshServerPrivateKeyPath = project.sshServerPrivateKeyPath;
-
-    await this.fileEncryptorProvider.decryptFilesOnPlace([
-      miniBackPrivateKey,
-      sshServerPrivateKeyPath,
-    ]);
-
-    miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
-    sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
-
-    const nameRemoteRepository = 'project';
-    try {
-      // place the private key of mini back
-      await this.sshProvider.putDirectoryToRemoteServer(
-        {
-          sshLink: project.serverUrl,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
-        },
-        path.join(rootDirectory, 'mini-back-key'),
-        nameRemoteRepository,
-      );
-
-      // pull mini back from github repo
-      await this.sshProvider.pullMiniBack(
-        {
-          sshLink: project.serverUrl,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
-        },
-        nameRemoteRepository,
-        project.gitProjectLink,
-      );
-
-      await this.sshProvider.runMiniBack(
-        {
-          sshLink: project.serverUrl,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
-        },
-        nameRemoteRepository,
-      );
-    } catch {
-      throw new BadRequestException(
-        'Set up private key, url of mini back and ssh git link correctly',
-      );
-    } finally {
-      await this.fileEncryptorProvider.encryptFilesOnPlace(
-        [miniBackPrivateKey, sshServerPrivateKeyPath].map((path) =>
-          path.replace(/.enc$/, ''),
-        ),
-      );
-    }
-
-    return 'success';
   }
 }

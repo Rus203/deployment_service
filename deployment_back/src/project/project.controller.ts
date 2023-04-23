@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
@@ -13,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { GetProjectDto } from './dto/get-project.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { storage } from 'src/configs';
@@ -72,14 +70,13 @@ export class ProjectController {
 
   @Get('/deploy/:id')
   async deployProject(@Param('id') id: string) {
-    return await this.projectService.placeMiniBakeByProjectId(id);
+    return await this.projectService.deploy(id);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectService.findOne(id);
   }
-
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
   //   return this.projectService.update(id, updateProjectDto);

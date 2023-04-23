@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Project } from './project.entity';
 import { FileEncryptorModule } from '../file-encryptor/files-encryptor.module';
 import { SSHModule } from 'src/ssh/ssh.module';
+import { MiniBackModule } from 'src/mini-back/mini-back.module';
 
 @Module({
   controllers: [ProjectController],
@@ -13,6 +14,7 @@ import { SSHModule } from 'src/ssh/ssh.module';
     TypeOrmModule.forFeature([Project]),
     FileEncryptorModule,
     SSHModule,
+    MiniBackModule,
   ],
 })
 export class ProjectModule {}

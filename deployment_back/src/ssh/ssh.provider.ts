@@ -109,14 +109,20 @@ export class SshProvider extends ChildProcessCommandProvider {
     });
   }
 
-  deleteMiniBack({
-    sshLink,
-    pathToSSHPrivateKey,
-  }: ISshConnectionOptions): Promise<boolean> {
+  deleteMiniBack(
+    { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    nameRemoteRepository: string,
+  ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const childProcess = spawn(
         'ssh',
-        [sshLink, '-i', pathToSSHPrivateKey, 'rm -r ~/mini_back'],
+        [
+          '-T',
+          sshLink,
+          '-i',
+          pathToSSHPrivateKey,
+          'pm2 delete all; rm -r ~/mini_back',
+        ],
         {
           shell: true,
         },
