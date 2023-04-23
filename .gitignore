@@ -2,6 +2,7 @@
 /deployment_back/dist
 /deployment_back/*.env
 /deployment_back/mini-back-key
+/deployment_back/uploads
 
 /deployment_front/node_modules
 /deployment_front/dist

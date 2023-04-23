@@ -9,7 +9,7 @@ import { probe } from '@network-utils/tcp-ping';
 import path from 'path';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
 import { SshProvider } from '../ssh/ssh.provider';
-import fs from 'fs';
+import fs from 'fs/promises';
 import { MiniBack } from './mini-back.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -66,14 +66,14 @@ export class MiniBackService {
       throw new NotFoundException('The instance of mini back not found');
     }
 
-    // const status = await this.pingMiniBack(currentMiniBack.serverUrl);
     try {
       await this.deleteMiniBackFromServer(currentMiniBack);
     } catch (error) {
       throw new BadRequestException(error);
+    } finally {
+      await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
+      await this.miniBackRepository.delete({ id });
     }
-
-    return this.miniBackRepository.delete({ id });
   }
 
   async placeMiniBake(id: string) {
@@ -100,7 +100,7 @@ export class MiniBackService {
       'id_rsa.enc',
     );
 
-    if (!fs.existsSync(miniBackPrivateKey)) {
+    if (await !fs.access(miniBackPrivateKey)) {
       throw new InternalServerErrorException(
         "Secret key of mini back wasn't provide",
       );

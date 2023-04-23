@@ -12,7 +12,7 @@ export class MiniBack {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 50, unique: true })
+  @Column({ length: 50 })
   name: string;
 
   @Column({ length: 255, name: 'ssh_server_private_key_path' })
