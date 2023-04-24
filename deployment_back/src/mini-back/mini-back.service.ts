@@ -43,12 +43,6 @@ export class MiniBackService {
   ) {
     dto.name = normalizeProjectName(dto.name);
 
-    const candidate = await this.getOne({ name: dto.name });
-
-    if (candidate !== null) {
-      throw new ConflictException('Such name has already existed');
-    }
-
     await this.fileEncryptorProvider.encryptFilesOnPlace([
       dto.sshServerPrivateKeyPath,
     ]);
@@ -72,7 +66,7 @@ export class MiniBackService {
       throw new BadRequestException(error);
     } finally {
       await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
-      await this.miniBackRepository.delete({ id });
+      await this.miniBackRepository.delete({ id }); // add deleting files of a project
     }
   }
 

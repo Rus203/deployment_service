@@ -121,9 +121,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'pm2 delete all;' +
-            `rm -r ~/${nameRemoteRepository};` +
-            'docker system prune -a --volumes',
+          'pm2 delete all;' + `rm -r ~/${nameRemoteRepository};`,
         ],
         {
           shell: true,

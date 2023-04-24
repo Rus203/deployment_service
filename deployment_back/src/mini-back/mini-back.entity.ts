@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../user/user.entity';
+import { Project } from 'src/project/project.entity';
 
 @Entity('mini-backs')
 export class MiniBack {
@@ -33,4 +35,7 @@ export class MiniBack {
 
   @Column({ name: 'user_id' })
   userId: string;
+
+  @OneToMany(() => Project, (project) => project.miniBack)
+  projects: Project[];
 }
