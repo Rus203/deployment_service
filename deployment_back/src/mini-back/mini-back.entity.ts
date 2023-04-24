@@ -38,4 +38,7 @@ export class MiniBack {
 
   @OneToMany(() => Project, (project) => project.miniBack)
   projects: Project[];
+
+  @Column({ default: false, type: 'boolean' })
+  isDeploy: boolean;
 }

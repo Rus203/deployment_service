@@ -26,12 +26,7 @@ export class ProjectController {
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
-      [
-        { name: 'envFile' },
-        { name: 'sshServerPrivateKey' },
-        { name: 'sshGitPrivateKeyProject' },
-        { name: 'sshGitPublicKeyProject' },
-      ],
+      [{ name: 'envFile' }, { name: 'sshGitPrivateKeyProject' }],
       { storage },
     ),
   )
@@ -40,22 +35,16 @@ export class ProjectController {
     @UploadedFiles()
     {
       envFile,
-      sshServerPrivateKey,
       sshGitPrivateKeyProject,
-      sshGitPublicKeyProject,
     }: {
       envFile?: Express.Multer.File[];
-      sshServerPrivateKey?: Express.Multer.File[];
       sshGitPrivateKeyProject?: Express.Multer.File[];
-      sshGitPublicKeyProject?: Express.Multer.File[];
     },
   ) {
     return await this.projectService.create(
       createProjectDto,
       envFile[0].path,
-      sshServerPrivateKey[0].path,
       sshGitPrivateKeyProject[0].path,
-      sshGitPublicKeyProject[0].path,
     );
   }
 
@@ -64,19 +53,16 @@ export class ProjectController {
     return this.projectService.findAll(getProjectDto);
   }
 
-  @Get('/deploy/:id')
+  @Post('/deploy/:id')
   async deployProject(@Param('id') id: string) {
-    return await this.projectService.deploy(id);
+    console.log(id);
+    return await this.projectService.deployProject(id);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectService.findOne(id);
   }
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-  //   return this.projectService.update(id, updateProjectDto);
-  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

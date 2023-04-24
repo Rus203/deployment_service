@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,6 +15,8 @@ import { Repository } from 'typeorm';
 import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { normalizeProjectName } from 'src/utils';
+import { ProjectService } from 'src/project/project.service';
+import { UpdateMiniBackDto } from './dto/update-mini-back.dto';
 
 @Injectable()
 export class MiniBackService {
@@ -25,6 +26,7 @@ export class MiniBackService {
     private fileEncryptorProvider: FileEncryptorProvider,
     @InjectRepository(MiniBack)
     private miniBackRepository: Repository<MiniBack>,
+    private projectService: ProjectService,
   ) {}
 
   async getAll(dto: GetMiniBackDto & { userId: string }) {
@@ -66,6 +68,16 @@ export class MiniBackService {
       throw new BadRequestException(error);
     } finally {
       await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
+      const projects = await this.projectService.findAll({
+        miniBackId: currentMiniBack.id,
+      });
+
+      if (projects.length > 0) {
+        projects.forEach(async (item) => {
+          await fs.unlink(item.envFilePath);
+          await fs.unlink(item.sshGitPrivateKeyProjectPath);
+        });
+      }
       await this.miniBackRepository.delete({ id }); // add deleting files of a project
     }
   }
@@ -94,7 +106,7 @@ export class MiniBackService {
       'id_rsa.enc',
     );
 
-    if (await !fs.access(miniBackPrivateKey)) {
+    if (!fs.access(miniBackPrivateKey)) {
       throw new InternalServerErrorException(
         "Secret key of mini back wasn't provide",
       );
@@ -179,5 +191,14 @@ export class MiniBackService {
         sshServerPrivateKeyPath.replace(/.enc$/, ''),
       );
     }
+  }
+
+  async update(id: string, parameters: UpdateMiniBackDto) {
+    const project = await this.getOne({ id });
+    if (project === null) {
+      throw new NotFoundException('Such a project was not found');
+    }
+
+    this.miniBackRepository.update({ id }, parameters);
   }
 }

@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
+import { MiniBack } from 'src/mini-back/mini-back.entity';
 
 @Entity('projects')
 export class Project {
@@ -11,9 +18,6 @@ export class Project {
   @Column({ length: 50 })
   email: string;
 
-  @Column({ length: 255, name: 'ssh_git_public_key_project_path' })
-  sshGitPublicKeyProjectPath: string;
-
   @Column({ length: 255, name: 'ssh_git_private_key_project_path' })
   sshGitPrivateKeyProjectPath: string;
 
@@ -23,12 +27,16 @@ export class Project {
   @Column({ length: 255, name: 'env_file_path' })
   envFilePath: string;
 
-  @Column({ length: 255, name: 'ssh_server_private_key_path' })
-  sshServerPrivateKeyPath: string;
+  @ManyToOne(() => MiniBack, (miniBack) => miniBack.projects)
+  @JoinColumn({ name: 'mini_back_id' })
+  miniBack: MiniBack;
 
-  @Column({ length: 2047, name: 'server_url' })
-  serverUrl: string;
+  @Column({ name: 'mini_back_id' })
+  miniBackId: string;
 
-  @Column({ name: 'user_id' })
-  userId: string;
+  @Column({ default: false, type: 'boolean' })
+  isDeploy: boolean;
+
+  @Column()
+  port: number;
 }

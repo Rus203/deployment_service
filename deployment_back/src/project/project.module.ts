@@ -4,8 +4,7 @@ import { ProjectController } from './project.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Project } from './project.entity';
 import { FileEncryptorModule } from '../file-encryptor/files-encryptor.module';
-import { SSHModule } from 'src/ssh/ssh.module';
-import { MiniBackModule } from 'src/mini-back/mini-back.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   controllers: [ProjectController],
@@ -13,8 +12,8 @@ import { MiniBackModule } from 'src/mini-back/mini-back.module';
   imports: [
     TypeOrmModule.forFeature([Project]),
     FileEncryptorModule,
-    SSHModule,
-    MiniBackModule,
+    HttpModule,
   ],
+  exports: [ProjectService],
 })
 export class ProjectModule {}
