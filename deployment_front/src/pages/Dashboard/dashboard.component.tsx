@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid';
 import { FC } from 'react';
 import ApexChartWrapper from '../../@core/styles/libs/react-apexcharts';
-import Table from '../../views/dashboard/Table';
+import Table from '../../views/dashboard/dashboard-table';
 import { Navigate } from 'react-router-dom';
 
 

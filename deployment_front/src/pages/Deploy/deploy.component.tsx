@@ -65,20 +65,13 @@ export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [project, setProject] = useState<IProject | null>(null);
-  const [otherProjects, setOtherProjects] = useState<IProject[]>([
+  const [otherProjects, setOtherProjects] = useState<any[]>([
     {
       id: "string",
       name: "string",
       email: "string",
-      sshServerUrl: "string",
-      sshGitPrivateKey: "string",
-      sshGitPublicKey: "string",
-      gitLink: "string",
-      envFile: "string",
-      sshFile: "string",
-      uploadPath: "string",
-      projectUrl: "string",
-      minibackUrl: "string",
+      sshGitPrivateKeyProject: "string",
+      gitProjectLink: "string",
     },
   ]);
 
@@ -151,8 +144,8 @@ export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
     reset({
       name: project?.name || "",
       email: project?.email || "",
-      sshServerUrl: project?.sshServerUrl || "",
-      gitLink: project?.gitLink || "",
+      // sshServerUrl: project?.sshServerUrl || "",
+      gitLink: project?.gitProjectLink || "",
       sshGitPrivateKey: null,
       sshGitPublicKey: null,
       sshFile: null,
@@ -255,7 +248,7 @@ export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
                     size="small"
                     required
                     focused
-                    defaultValue={project?.gitLink || ""}
+                    defaultValue={project?.gitProjectLink || ""}
                     error={!!errors.gitLink?.message}
                     {...register("gitLink", {
                       required: "*Git link is required",
@@ -334,7 +327,7 @@ export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
               <SectionHeader>SSH data</SectionHeader>
               <SectionInputs>
                 <FormControl>
-                  <TextField
+                  {/* <TextField
                     label="SSH Server url"
                     size="small"
                     defaultValue={project?.sshServerUrl || ""}
@@ -344,7 +337,7 @@ export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
                     {...register("sshServerUrl", {
                       required: "*SSH Server url required",
                     })}
-                  />
+                  /> */}
                   {errors.sshServerUrl && (
                     <FormHelperText>
                       {errors.sshServerUrl?.message}
@@ -434,28 +427,6 @@ export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
           </SelectProjectsContainer>
         </FormContainer>
       )}
-      <Card>
-        <TableContainer>
-          <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
-            <TableHead>
-              <TableRow>
-                <TableCell>Total memory</TableCell>
-                <TableCell>Free memory</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {[].map((row: IProject) => (
-                  <TableRow hover key={row.id}>
-                    <TableCell>{row.gitLink}</TableCell>
-                    <TableCell>{row.sshServerUrl}</TableCell>
-                    <TableCell>{row.minibackUrl}</TableCell>
-                  </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
     </Container>
   );
 };

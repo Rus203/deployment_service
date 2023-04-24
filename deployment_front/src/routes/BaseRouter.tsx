@@ -8,12 +8,12 @@ import UserLayout from "../layouts/UserLayout";
 import { Deploy } from "../pages/Deploy/deploy.component";
 import { useAppSelector } from "../store/hooks";
 import Graph from "../pages/Graphs/graphs.component";
-import MiniBack from "../pages/Projects/projects.component";
+import Projects from "../pages/Projects/projects.component";
 
 
 const BaseRouter: FC = () => {
-  // const hasAccess = useAppSelector(state => state.auth.accessToken) !== null
-  const hasAccess = true
+  const hasAccess = useAppSelector(state => state.auth.accessToken) !== null
+  // const hasAccess = true
 
   return (
     <BrowserRouter>
@@ -23,9 +23,9 @@ const BaseRouter: FC = () => {
           <Route path="register" element={<Register />} />
           <Route path='/' element={<UserLayout />} >
             <Route index element={<Dashboard hasAccess={hasAccess} />} />
-            <Route path="graph" element={<Graph hasAccess={hasAccess} />} />
+            <Route path="diagrams" element={<Graph hasAccess={hasAccess} />} />
             <Route path="deploy/" element={<Deploy hasAccess={hasAccess} />} />
-            <Route path="projects/" element={<MiniBack hasAccess={hasAccess} />} />
+            <Route path="mini-back/:projectId/projects/" element={<Projects hasAccess={hasAccess} />} />
             <Route path="deploy/:projectId" element={<Deploy hasAccess={hasAccess} />} />
           </Route>
         </Route>

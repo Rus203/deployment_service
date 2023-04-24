@@ -2,9 +2,9 @@ import React, { FC } from 'react';
 import { Navigate } from 'react-router-dom';
 import ApexChartWrapper from '../../@core/styles/libs/react-apexcharts';
 import Grid from '@mui/material/Grid';
-import Table from '../../views/dashboard/Table';
+import Table from '../../views/projects/projects-table';
 
-const MiniBack: FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
+const Projects: FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
   return !hasAccess
     ? <Navigate to="/login" replace={true} />
     : (<ApexChartWrapper>
@@ -16,4 +16,4 @@ const MiniBack: FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
     </ApexChartWrapper>)
 };
 
-export default MiniBack;
+export default Projects;

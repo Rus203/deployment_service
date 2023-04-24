@@ -15,6 +15,7 @@ import {
 
 import { projectsApi } from "../services";
 import { authReducer } from "./features";
+import { minibacksApi } from "../services/miniback.api";
 
 const persistConfig = {
   key: "root",
@@ -24,6 +25,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   [projectsApi.reducerPath]: projectsApi.reducer,
+  [minibacksApi.reducerPath]: minibacksApi.reducer,
   auth: authReducer,
 });
 
@@ -34,7 +36,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(projectsApi.middleware),
+    }).concat(projectsApi.middleware, minibacksApi.middleware),
 });
 
 export const persistor = persistStore(store);
