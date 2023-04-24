@@ -1,6 +1,8 @@
-import { IsNotEmpty, MaxLength, IsEmail, Length } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { IsNotEmpty, MaxLength, IsEmail, MinLength } from 'class-validator';
+import { User } from '../user.entity';
 
-export class CreateUserDto {
+export class CreateUserDto extends PartialType(User) {
   @IsNotEmpty()
   @MaxLength(50)
   name: string;
@@ -12,5 +14,6 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @MaxLength(50)
+  @MinLength(3)
   password: string;
 }
