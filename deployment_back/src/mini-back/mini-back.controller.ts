@@ -16,32 +16,77 @@ import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { storage } from 'src/configs';
 import { FindOneParams } from './dto/find-one-param.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
 import { User } from 'src/user/user.entity';
 
-@ApiBearerAuth()
+@ApiTags('mini-back')
 @Controller('mini-back')
 export class MiniBackController {
   constructor(private miniBackService: MiniBackService) {}
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiInternalServerErrorResponse({ description: 'Server error' })
+  @ApiBearerAuth()
   @Get()
   async getAll(dto: GetMiniBackDto, @Req() req: Request & { user: User }) {
     return await this.miniBackService.getAll({ ...dto, userId: req.user.id });
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiInternalServerErrorResponse({ description: 'Server error' })
+  @ApiBearerAuth()
   @Get(':id')
-  async getOne(dto: GetMiniBackDto) {
-    return await this.miniBackService.getOne(dto);
+  async getOne(@Param('id') id: string, @Req() req: Request & { user: User }) {
+    return await this.miniBackService.getOne({ id, userId: req.user.id });
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
+  @ApiInternalServerErrorResponse({ description: 'Server error' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'serverUrl', 'sshServerPrivateKey'],
+      properties: {
+        name: {
+          type: 'string',
+        },
+
+        serverUrl: {
+          type: 'string',
+        },
+
+        sshServerPrivateKey: {
+          type: 'file',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'sshServerPrivateKey' }], { storage }),
   )
+  @ApiConsumes('multipart/form-data')
   async create(
     @Body() dto: CreateMiniBackDto,
     @Req() req: Request & { user: User },
@@ -57,15 +102,33 @@ export class MiniBackController {
     });
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({
+    description: 'Bad request',
+  })
+  @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
+  @ApiInternalServerErrorResponse({ description: 'Server error' })
   @Post('deploy/:id')
-  async deployMiniBack(@Param() dto: FindOneParams) {
-    const id = dto.id;
-    return await this.miniBackService.placeMiniBake(id);
+  async deployMiniBack(
+    @Param('id') id: string,
+    @Req() req: Request & { user: User },
+  ) {
+    return await this.miniBackService.placeMiniBake({
+      id,
+      userId: req.user.id,
+    });
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
+  @ApiInternalServerErrorResponse({ description: 'Server error' })
   @Delete(':id')
-  async delete(@Param() dto: FindOneParams) {
-    const id = dto.id;
-    await this.miniBackService.delete(id);
+  async delete(@Param('id') id: string, @Req() req: Request & { user: User }) {
+    await this.miniBackService.delete({ id, userId: req.user.id });
   }
 }

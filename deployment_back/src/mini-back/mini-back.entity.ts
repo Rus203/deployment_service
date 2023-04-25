@@ -20,8 +20,8 @@ export class MiniBack {
   @Column({ length: 255, name: 'ssh_server_private_key_path' })
   sshServerPrivateKeyPath: string;
 
-  @Column({ name: 'server_url', length: 2047 })
-  serverUrl: string;
+  @Column({ name: 'ssh_connection_string', length: 2047 })
+  sshConnectionString: string;
 
   @Column({ name: 'name_remote_repository' })
   nameRemoteRepository: string;

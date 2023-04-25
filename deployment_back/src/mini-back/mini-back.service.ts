@@ -15,18 +15,14 @@ import { Repository } from 'typeorm';
 import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { normalizeProjectName } from 'src/utils';
-import { ProjectService } from 'src/project/project.service';
-import { UpdateMiniBackDto } from './dto/update-mini-back.dto';
 
 @Injectable()
 export class MiniBackService {
-  // nameRemoteRepository = 'project';
   constructor(
     private sshProvider: SshProvider,
     private fileEncryptorProvider: FileEncryptorProvider,
     @InjectRepository(MiniBack)
     private miniBackRepository: Repository<MiniBack>,
-    private projectService: ProjectService,
   ) {}
 
   async getAll(dto: GetMiniBackDto & { userId: string }) {
@@ -34,7 +30,10 @@ export class MiniBackService {
   }
 
   async getOne(dto: GetMiniBackDto) {
-    return await this.miniBackRepository.findOneBy(dto);
+    return this.miniBackRepository.findOne({
+      where: dto,
+      relations: ['projects'],
+    });
   }
 
   async create(
@@ -56,8 +55,8 @@ export class MiniBackService {
     return this.miniBackRepository.save({ ...instance, nameRemoteRepository });
   }
 
-  async delete(id: string) {
-    const currentMiniBack = await this.getOne({ id });
+  async delete(dto: GetMiniBackDto) {
+    const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new NotFoundException('The instance of mini back not found');
     }
@@ -68,34 +67,36 @@ export class MiniBackService {
       throw new BadRequestException(error);
     } finally {
       await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
-      const projects = await this.projectService.findAll({
-        miniBackId: currentMiniBack.id,
-      });
+      const projects = currentMiniBack.projects;
 
       if (projects.length > 0) {
         projects.forEach(async (item) => {
-          await fs.unlink(item.envFilePath);
-          await fs.unlink(item.sshGitPrivateKeyProjectPath);
+          await fs.unlink(item.envFilePath).catch((error) => {
+            console.log(error);
+          });
+          await fs.unlink(item.sshGitPrivateKeyProjectPath).catch((error) => {
+            console.log(error);
+          });
         });
       }
-      await this.miniBackRepository.delete({ id }); // add deleting files of a project
+      await this.miniBackRepository.delete(dto);
     }
   }
 
-  async placeMiniBake(id: string) {
-    const currentMiniBack = await this.getOne({ id });
+  async placeMiniBake(dto: GetMiniBackDto) {
+    const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new NotFoundException('The instance of mini back not found');
     }
 
-    const status = await this.pingMiniBack(currentMiniBack.serverUrl);
-    if (status) {
+    const isDeploy = currentMiniBack.isDeploy;
+    if (isDeploy) {
       throw new BadRequestException(
         'This instance of mini_back has already places',
       );
     }
     // eslint-disable-next-line prefer-const
-    let { serverUrl, sshServerPrivateKeyPath, nameRemoteRepository } =
+    let { sshConnectionString, sshServerPrivateKeyPath, nameRemoteRepository } =
       currentMiniBack;
     const gitProjectLink = process.env.GIT_MINI_BACK_LINK;
     const rootDirectory = path.join(__dirname, '..', '..');
@@ -124,7 +125,7 @@ export class MiniBackService {
       // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
         {
-          sshLink: serverUrl,
+          sshLink: sshConnectionString,
           pathToSSHPrivateKey: sshServerPrivateKeyPath,
         },
         path.join(rootDirectory, 'mini-back-key'),
@@ -134,7 +135,7 @@ export class MiniBackService {
       // pull mini back from github repo
       await this.sshProvider.pullMiniBack(
         {
-          sshLink: serverUrl,
+          sshLink: sshConnectionString,
           pathToSSHPrivateKey: sshServerPrivateKeyPath,
         },
         nameRemoteRepository,
@@ -143,11 +144,13 @@ export class MiniBackService {
 
       await this.sshProvider.runMiniBack(
         {
-          sshLink: serverUrl,
+          sshLink: sshConnectionString,
           pathToSSHPrivateKey: sshServerPrivateKeyPath,
         },
         nameRemoteRepository,
       );
+
+      await this.defineAsDeployed(currentMiniBack.id, currentMiniBack.userId);
     } catch (error: any) {
       throw new BadRequestException(error);
     } finally {
@@ -161,15 +164,9 @@ export class MiniBackService {
     return 'success';
   }
 
-  async pingMiniBack(serverUrl: string) {
-    const miniBackPort = Number(process.env.MINI_BACK_PORT);
-    const miniBackUrl = serverUrl.split('@').at(1);
-    return await probe(miniBackPort, miniBackUrl);
-  }
-
   async deleteMiniBackFromServer(currentMiniBack: MiniBack) {
     // eslint-disable-next-line prefer-const
-    let { sshServerPrivateKeyPath, serverUrl, nameRemoteRepository } =
+    let { sshServerPrivateKeyPath, sshConnectionString, nameRemoteRepository } =
       currentMiniBack;
     try {
       await this.fileEncryptorProvider.decryptFilesOnPlace([
@@ -179,7 +176,7 @@ export class MiniBackService {
 
       await this.sshProvider.deleteMiniBack(
         {
-          sshLink: serverUrl,
+          sshLink: sshConnectionString,
           pathToSSHPrivateKey: sshServerPrivateKeyPath,
         },
         nameRemoteRepository,
@@ -193,12 +190,12 @@ export class MiniBackService {
     }
   }
 
-  async update(id: string, parameters: UpdateMiniBackDto) {
-    const project = await this.getOne({ id });
+  async defineAsDeployed(id: string, userId: string) {
+    const project = await this.getOne({ id, userId });
     if (project === null) {
       throw new NotFoundException('Such a project was not found');
     }
 
-    this.miniBackRepository.update({ id }, parameters);
+    this.miniBackRepository.update({ id }, { isDeploy: true });
   }
 }
