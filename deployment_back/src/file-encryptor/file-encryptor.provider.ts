@@ -9,9 +9,10 @@ import {
   access,
   rmSync,
   existsSync,
+  // chmod,
 } from 'fs';
 
-import { readdir } from 'node:fs/promises';
+import { readdir, chmod } from 'node:fs/promises';
 
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { pipeline } from 'node:stream';
@@ -23,6 +24,7 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
     const miniBackPrivateKey = path.join(commonFolder, 'id_rsa');
 
     if (existsSync(miniBackPrivateKey)) {
+      await chmod(miniBackPrivateKey, 600);
       await this.encryptFilesOnPlace([miniBackPrivateKey]);
       await this.removeUnencryptedFiles(commonFolder);
     }

@@ -25,7 +25,7 @@ export class MiniBackService {
     private miniBackRepository: Repository<MiniBack>,
   ) {}
 
-  async getAll(dto: GetMiniBackDto & { userId: string }) {
+  async getAll(dto: GetMiniBackDto) {
     return await this.miniBackRepository.find({ where: dto });
   }
 
@@ -35,6 +35,7 @@ export class MiniBackService {
       relations: ['projects'],
     });
   }
+
 
   async create(
     dto: CreateMiniBackDto & {

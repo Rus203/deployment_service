@@ -97,8 +97,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           pathToSSHPrivateKey,
           `cd ~/${nameRemoteRepository}/mini_back;` +
             'ls;' +
-            'npm run npm:install;' +
-            'npm run pm2:start;',
+            'docker compose up --build -d;',
         ],
         {
           shell: true,
@@ -121,7 +120,9 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'pm2 delete all;' + `rm -r ~/${nameRemoteRepository};`,
+          `cd ${nameRemoteRepository}/mini_back;` +
+            'docker compose down --rmi all;' +
+            `rm -r ~/${nameRemoteRepository};`,
         ],
         {
           shell: true,
