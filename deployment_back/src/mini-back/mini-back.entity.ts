@@ -7,7 +7,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '../user/user.entity';
-import { Project } from 'src/project/project.entity';
 
 @Entity('mini-backs')
 export class MiniBack {
@@ -23,6 +22,9 @@ export class MiniBack {
   @Column({ name: 'ssh_connection_string', length: 2047 })
   sshConnectionString: string;
 
+  @Column({ name: 'server_url', length: 2047 })
+  serverUrl: string;
+
   @Column({ name: 'name_remote_repository' })
   nameRemoteRepository: string;
 
@@ -35,9 +37,6 @@ export class MiniBack {
 
   @Column({ name: 'user_id' })
   userId: string;
-
-  @OneToMany(() => Project, (project) => project.miniBack)
-  projects: Project[];
 
   @Column({ default: false, type: 'boolean' })
   isDeploy: boolean;

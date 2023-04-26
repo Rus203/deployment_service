@@ -22,7 +22,7 @@ export class UserService {
   }
 
   async findOne(getUserDto: GetUserDto) {
-    return this.usersRepository.findOneBy(getUserDto);
+    return this.usersRepository.findOne({ where: getUserDto });
   }
 
   remove(id: string) {

@@ -11,11 +11,9 @@ import {
   Body,
 } from '@nestjs/common';
 import { MiniBackService } from './mini-back.service';
-import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { storage } from 'src/configs';
-import { FindOneParams } from './dto/find-one-param.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -41,8 +39,8 @@ export class MiniBackController {
   @ApiInternalServerErrorResponse({ description: 'Server error' })
   @ApiBearerAuth()
   @Get()
-  async getAll(dto: GetMiniBackDto, @Req() req: Request & { user: User }) {
-    return await this.miniBackService.getAll({ ...dto, userId: req.user.id });
+  async getAll(@Req() req: Request & { user: User }) {
+    return await this.miniBackService.getAll(req.user.id);
   }
 
   @ApiBearerAuth()
@@ -71,7 +69,7 @@ export class MiniBackController {
           type: 'string',
         },
 
-        serverUrl: {
+        sshConnectionString: {
           type: 'string',
         },
 

@@ -8,7 +8,6 @@ import { AccessTokenModule } from './access-token/access-token.module';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { typeOrmConfig } from './configs';
 import { redisConfig } from './configs';
-import { ProjectModule } from './project/project.module';
 import { SSHModule } from './ssh/ssh.module';
 import { FileEncryptorModule } from './file-encryptor/files-encryptor.module';
 import { MiniBackModule } from './mini-back/mini-back.module';
@@ -23,7 +22,6 @@ import { MiniBackModule } from './mini-back/mini-back.module';
     AuthModule,
     AccessTokenModule,
     RedisModule,
-    ProjectModule,
     SSHModule,
     FileEncryptorModule,
     MiniBackModule,

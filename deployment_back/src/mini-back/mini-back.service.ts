@@ -4,7 +4,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { probe } from '@network-utils/tcp-ping';
 import path from 'path';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
 import { SshProvider } from '../ssh/ssh.provider';
@@ -25,17 +24,13 @@ export class MiniBackService {
     private miniBackRepository: Repository<MiniBack>,
   ) {}
 
-  async getAll(dto: GetMiniBackDto) {
-    return await this.miniBackRepository.find({ where: dto });
+  async getAll(userId: string) {
+    return await this.miniBackRepository.find({ where: { userId } });
   }
 
-  async getOne(dto: GetMiniBackDto) {
-    return this.miniBackRepository.findOne({
-      where: dto,
-      relations: ['projects'],
-    });
+  async getOne(dto: GetMiniBackDto & { serverUrl?: string }) {
+    return this.miniBackRepository.findOne({ where: dto });
   }
-
 
   async create(
     dto: CreateMiniBackDto & {
@@ -43,15 +38,20 @@ export class MiniBackService {
       userId: string;
     },
   ) {
-    dto.name = normalizeProjectName(dto.name);
+    const serverUrl = dto.sshConnectionString.split('@')[1];
+    const candidate = await this.getOne({ userId: dto.userId, serverUrl });
 
+    if (candidate !== null) {
+      throw new BadRequestException('This server is already busy');
+    }
+
+    dto.name = normalizeProjectName(dto.name);
     await this.fileEncryptorProvider.encryptFilesOnPlace([
       dto.sshServerPrivateKeyPath,
     ]);
 
     dto.sshServerPrivateKeyPath = dto.sshServerPrivateKeyPath + '.enc';
-
-    const instance = this.miniBackRepository.create(dto);
+    const instance = this.miniBackRepository.create({ ...dto, serverUrl });
     const nameRemoteRepository = process.env.REMOTE_REPOSITORY;
     return this.miniBackRepository.save({ ...instance, nameRemoteRepository });
   }
@@ -67,19 +67,11 @@ export class MiniBackService {
     } catch (error) {
       throw new BadRequestException(error);
     } finally {
-      await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
-      const projects = currentMiniBack.projects;
-
-      if (projects.length > 0) {
-        projects.forEach(async (item) => {
-          await fs.unlink(item.envFilePath).catch((error) => {
-            console.log(error);
-          });
-          await fs.unlink(item.sshGitPrivateKeyProjectPath).catch((error) => {
-            console.log(error);
-          });
+      await fs
+        .unlink(currentMiniBack.sshServerPrivateKeyPath)
+        .catch((error) => {
+          console.log(error);
         });
-      }
       await this.miniBackRepository.delete(dto);
     }
   }
@@ -194,9 +186,9 @@ export class MiniBackService {
   async defineAsDeployed(id: string, userId: string) {
     const project = await this.getOne({ id, userId });
     if (project === null) {
-      throw new NotFoundException('Such a project was not found');
+      throw new NotFoundException('Such a mini back was not found');
     }
 
-    this.miniBackRepository.update({ id }, { isDeploy: true });
+    await this.miniBackRepository.update({ id }, { isDeploy: true });
   }
 }

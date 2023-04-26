@@ -1,7 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { RefreshToken } from 'src/refresh-token/refresh-token.entity';
-import { Project } from 'src/project/project.entity';
 import { MiniBack } from 'src/mini-back/mini-back.entity';
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
@@ -11,6 +10,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB,
-  entities: [User, RefreshToken, Project, MiniBack],
+  entities: [User, RefreshToken, MiniBack],
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
 };
