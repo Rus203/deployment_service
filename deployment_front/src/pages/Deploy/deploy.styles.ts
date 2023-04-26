@@ -36,7 +36,7 @@ export const StatisticsContainer = styled.div`
 `;
 
 export const FormControl = styled(MuiFormControl)`
-  width: 25%;
+  width: 30%;
 `;
 
 export const FileInput = styled.input.attrs({

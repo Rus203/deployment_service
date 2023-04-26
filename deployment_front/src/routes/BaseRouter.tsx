@@ -12,8 +12,8 @@ import Projects from "../pages/Projects/projects.component";
 
 
 const BaseRouter: FC = () => {
-  const hasAccess = useAppSelector(state => state.auth.accessToken) !== null
-  // const hasAccess = true
+  // const hasAccess = useAppSelector(state => state.auth.accessToken) !== null
+  const hasAccess = true
 
   return (
     <BrowserRouter>
@@ -25,8 +25,6 @@ const BaseRouter: FC = () => {
             <Route index element={<Dashboard hasAccess={hasAccess} />} />
             <Route path="diagrams" element={<Graph hasAccess={hasAccess} />} />
             <Route path="deploy/" element={<Deploy hasAccess={hasAccess} />} />
-            <Route path="mini-back/:projectId/projects/" element={<Projects hasAccess={hasAccess} />} />
-            <Route path="deploy/:projectId" element={<Deploy hasAccess={hasAccess} />} />
           </Route>
         </Route>
         <Route path="/*" element={<Whooops />} />

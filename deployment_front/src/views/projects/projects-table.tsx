@@ -20,7 +20,17 @@ interface IProps {
 }
 
 const ProjectsTable: FC = () => {
-  const { data = [] } = useGetProjectsQuery(undefined)
+  // const { data = [] } = useGetProjectsQuery(undefined)
+  const data: IProject[] = [{
+    email: 'string',
+    gitProjectLink: 'string',
+    id: 'string',
+    isDeploy: false,
+    miniBackId: 'string',
+    name: 'string',
+    port: 10000,
+    sshGitPrivateKeyProject: 'string',
+  }]
 
   const navigate = useNavigate();
 
@@ -35,7 +45,7 @@ const ProjectsTable: FC = () => {
                 <TableCell>Name</TableCell>
                 <TableCell>Git link</TableCell>
                 <TableCell>Server URL</TableCell>
-                <TableCell colSpan={2} align='center'></TableCell>
+                <TableCell colSpan={4} align='center'>Controls</TableCell>
 
                 {/* <TableCell>Project url</TableCell> */}
               </TableRow>
@@ -61,8 +71,13 @@ const ProjectsTable: FC = () => {
                   {/* <TableCell>{row.sshGitPrivateKeyProjectPath
                   }</TableCell> */}
                   <TableCell>{row.miniBackId}</TableCell>
-                  <TableCell><Button variant='outlined'>Deploy</Button></TableCell>
-                  <TableCell><Button  variant='outlined' color='error'>Delete</Button></TableCell>
+                  {/* </TableCell> */}
+                  <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around' }} >
+                    {/* <Box></Box> */}
+                    <Button variant='outlined'>Deploy</Button>
+                    <Button variant='outlined'>Save</Button>
+                    <Button  variant='outlined' color='error'>Delete</Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
