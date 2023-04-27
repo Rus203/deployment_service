@@ -75,5 +75,6 @@ export const FormHelperText = styled(MuiFormHelperText)`
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  text-transform: none;
 `;
 
