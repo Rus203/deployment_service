@@ -55,7 +55,7 @@ export class AuthService {
       email: user.email,
     });
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken, name: user.name, email: user.email };
   }
 
   async updateTokens(dto: AuthRefreshDto) {
