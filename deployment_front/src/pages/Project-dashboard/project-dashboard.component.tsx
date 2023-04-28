@@ -1,12 +1,11 @@
 import Grid from '@mui/material/Grid';
 import { FC } from 'react';
 import ApexChartWrapper from '../../@core/styles/libs/react-apexcharts';
-import Table from '../../views/dashboard/dashboard-table';
+import Table from '../../views/dashboard-project-table';
 import { Navigate } from 'react-router-dom';
 
 
-
-const Dashboard: FC<{ hasAccess: boolean }> = ({ hasAccess }) => {
+const ProjectDashboard: FC<{ hasAccess: boolean }> = ({ hasAccess }) => {
     return !hasAccess
       ? <Navigate to="/login" replace={true} />
       : (<ApexChartWrapper>
@@ -18,4 +17,4 @@ const Dashboard: FC<{ hasAccess: boolean }> = ({ hasAccess }) => {
     </ApexChartWrapper>)
 };
 
-export default Dashboard;
+export default ProjectDashboard;

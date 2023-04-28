@@ -15,7 +15,7 @@ import {
   ButtonsContainer,
   FormHelperText,
   FileInput,
-} from "./deploy.styles";
+} from "./project.styles";
 import { Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 
@@ -28,7 +28,7 @@ interface IProject {
   sshGitPrivateKey: FileList
 } 
 
-export const Deploy: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
+export const Project: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
   const { register, handleSubmit, watch, formState: {errors} } = useForm<IProject>({
     mode: 'onChange'
   });

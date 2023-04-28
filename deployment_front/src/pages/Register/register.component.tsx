@@ -11,7 +11,7 @@ import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 
 import EyeOffOutline from "mdi-material-ui/EyeOffOutline";
 import EyeOutline from "mdi-material-ui/EyeOutline";
@@ -21,7 +21,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { BoxStyled } from "./register.styles";
 import { FormHelperText } from "@mui/material";
 import Link from "../../Components/Link/LInk";
-import AuthApiService from "../../services/api/AuthApiService";
 import { useNavigate } from "react-router-dom";
 import { useRegisterUserMutation } from "../../services";
 import { authSchema } from "../../schemas/AuthSchema";

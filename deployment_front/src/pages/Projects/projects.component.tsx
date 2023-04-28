@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { Navigate } from 'react-router-dom';
 import ApexChartWrapper from '../../@core/styles/libs/react-apexcharts';
 import Grid from '@mui/material/Grid';
-import Table from '../../views/projects/projects-table';
+import Table from '../../views/dashboard-project-table/dashboard-project-table';
 
 const Projects: FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
   return !hasAccess

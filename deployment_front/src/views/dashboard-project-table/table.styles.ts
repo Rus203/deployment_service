@@ -12,3 +12,7 @@ export const LinkToDeploy = styled(Link)`
   text-decoration: none;
 `
 
+export const FixedTable = styled.div`
+  height: 70vh;
+  overflow-y: scroll;
+`

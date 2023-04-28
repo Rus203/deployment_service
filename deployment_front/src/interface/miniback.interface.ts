@@ -1,7 +1,6 @@
-export interface IMiniback {
+export interface IMiniBack {
   id: string;
   name: string;
-  sshServerPrivateKeyPath: string;
   serverUrl: string;
   nameRemoteRepository: string;
   userId: string;

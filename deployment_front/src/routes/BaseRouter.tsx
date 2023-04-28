@@ -2,13 +2,14 @@ import React, { FC } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Register from "../pages/Register";
 import Whooops from "../pages/Whoops";
-import Dashboard from "../pages/Dashboard";
+import ProjectDashboard from "../pages/Project-dashboard";
 import Login from "../pages/Login";
 import UserLayout from "../layouts/UserLayout";
-import { Deploy } from "../pages/Deploy/deploy.component";
+import Project from "../pages/Project";
 import { useAppSelector } from "../store/hooks";
 import Graph from "../pages/Graphs/graphs.component";
-import Projects from "../pages/Projects/projects.component";
+import DashboardMiniBack from "../pages/mini-back-dashboard/project-dashboard.component";
+import MiniBack from '../pages/Mini-Back';
 
 
 const BaseRouter: FC = () => {
@@ -22,9 +23,13 @@ const BaseRouter: FC = () => {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path='/' element={<UserLayout />} >
-            <Route index element={<Dashboard hasAccess={hasAccess} />} />
-            <Route path="diagrams" element={<Graph hasAccess={hasAccess} />} />
-            <Route path="deploy/" element={<Deploy hasAccess={hasAccess} />} />
+            <Route index element={<DashboardMiniBack hasAccess={hasAccess} />} />
+            <Route path="mini-back" element={<MiniBack hasAccess={hasAccess} />} />
+              <Route path=':miniBackId'>
+                <Route index element={<ProjectDashboard hasAccess={hasAccess} />} />
+                <Route path="diagrams" element={<Graph hasAccess={hasAccess} />} />
+                <Route path="project" element={<Project hasAccess={hasAccess} />} />
+              </Route>
           </Route>
         </Route>
         <Route path="/*" element={<Whooops />} />

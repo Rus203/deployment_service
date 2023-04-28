@@ -5,7 +5,7 @@ import {
   createApi,
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
-import { IMiniback } from "../interface/miniback.interface";
+import { IMiniBack } from "../interface/miniback.interface";
 import { RootState } from "../store";
 import { setCredentials } from "../store/features";
 
@@ -75,7 +75,7 @@ export const minibacksApi = createApi({
   tagTypes: ["Miniback"],
 
   endpoints: (build) => ({
-    getMinibacks: build.query<IMiniback[], undefined>({
+    getMinibacks: build.query<IMiniBack[], undefined>({
       query: () => "mini-back",
       providesTags: (result) =>
         result
@@ -86,13 +86,13 @@ export const minibacksApi = createApi({
           : ["Miniback"],
     }),
 
-    getMiniback: build.query<IMiniback, string>({
+    getMiniback: build.query<IMiniBack, string>({
       query: (id) => `mini-back/${id}`,
       providesTags: (result) =>
         result ? [{ type: "Miniback" as const, id: result.id }] : ["Miniback"],
     }),
 
-    createMiniback: build.mutation<IMiniback, FormData>({
+    createMiniback: build.mutation<IMiniBack, FormData>({
       query: (body) => ({
         url: "mini-back",
         method: "POST",
@@ -101,7 +101,7 @@ export const minibacksApi = createApi({
       invalidatesTags: ["Miniback"],
     }),
 
-    updateMiniback: build.mutation<IMiniback, { body: FormData; id: string }>({
+    updateMiniback: build.mutation<IMiniBack, { body: FormData; id: string }>({
       query: ({ id, body }) => ({
         url: `miniback/${id}`,
         method: "PATCH",

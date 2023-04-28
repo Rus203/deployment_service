@@ -1,8 +1,8 @@
 import React from 'react'
-import Dashboard from './dashboard.component'
+import MiniBackDashboard from './project-dashboard.component'
 
 const Component: React.FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
-  return <Dashboard hasAccess={hasAccess} />
+  return <MiniBackDashboard hasAccess={hasAccess} />
 }
 
 export default Component

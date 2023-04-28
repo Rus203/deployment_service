@@ -1,8 +1,8 @@
 import { FC } from "react";
-import { Deploy } from "./deploy.component";
+import { MiniBack} from "./mini-back.component";
 
 const Component: FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
-  return <Deploy hasAccess={hasAccess} />;
+  return <MiniBack hasAccess={hasAccess} />;
 };
 
 export default Component;

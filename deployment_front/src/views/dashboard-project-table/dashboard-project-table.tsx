@@ -11,26 +11,46 @@ import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
 import { useNavigate } from 'react-router-dom'
 import { IProject } from '../../interface/project.interface'
-import { useGetProjectsQuery } from '../../services'
-import { Container, LinkToDeploy } from './table.styles'
+import { Container, LinkToDeploy, FixedTable } from './table.styles'
 
 
-interface IProps {
-
-}
-
-const ProjectsTable: FC = () => {
+const DashBoardProjectTable: FC = () => {
   // const { data = [] } = useGetProjectsQuery(undefined)
-  const data: IProject[] = [{
-    email: 'string',
-    gitProjectLink: 'string',
-    id: 'string',
-    isDeploy: false,
-    miniBackId: 'string',
-    name: 'string',
-    port: 10000,
-    sshGitPrivateKeyProject: 'string',
-  }]
+  const data: IProject[] = [
+    // mock data
+    {
+      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
+      email: 'test@gmail.com',
+      port: 10000,
+      name: 'test',
+      gitLink: 'git@github.com:Rus203/mini_back.git',
+      isDeploy: true
+    }, 
+    {
+      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
+      email: 'test@gmail.com',
+      port: 10000,
+      name: 'test',
+      gitLink: 'git@github.com:Rus203/mini_back.git',
+      isDeploy: true
+    },
+    {
+      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
+      email: 'test@gmail.com',
+      port: 10000,
+      name: 'test',
+      gitLink: 'git@github.com:Rus203/mini_back.git',
+      isDeploy: true
+    },
+    {
+      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
+      email: 'test@gmail.com',
+      port: 10000,
+      name: 'test',
+      gitLink: 'git@github.com:Rus203/mini_back.git',
+      isDeploy: true
+    }
+  ]
 
   const navigate = useNavigate();
 
@@ -38,27 +58,25 @@ const ProjectsTable: FC = () => {
     <Container>
       <Card>
         <TableContainer>
+          <FixedTable>
           <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
             <TableHead>
               <TableRow>
                 <TableCell>№</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Git link</TableCell>
-                <TableCell>Server URL</TableCell>
+                <TableCell>Port</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell colSpan={4} align='center'>Controls</TableCell>
-
-                {/* <TableCell>Project url</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((row: IProject, index) => (
+              {
+                data.map((row: IProject, index) => (
                 <TableRow
                   hover
                   key={row.id}
                   sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
-                // onClick={() => {
-                //   navigate(`/miniback/${row.id}/projects/`)
-                // }}
                 >
                   <TableCell>{index + 1}</TableCell>
                   <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
@@ -67,21 +85,19 @@ const ProjectsTable: FC = () => {
                       <Typography variant='caption'>{row.email}</Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>{row.gitProjectLink}</TableCell>
-                  {/* <TableCell>{row.sshGitPrivateKeyProjectPath
-                  }</TableCell> */}
-                  <TableCell>{row.miniBackId}</TableCell>
-                  {/* </TableCell> */}
-                  <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around' }} >
-                    {/* <Box></Box> */}
-                    <Button variant='outlined'>Deploy</Button>
-                    <Button variant='outlined'>Save</Button>
-                    <Button  variant='outlined' color='error'>Delete</Button>
+                  <TableCell>{row.gitLink}</TableCell>
+                  <TableCell>{row.port}</TableCell>
+                  <TableCell>{row.isDeploy ? 'deployed' : 'not deployed'}</TableCell>
+                  <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
+                    <Button variant='outlined' disabled={row.isDeploy}>Deploy</Button>
+                    <Button variant='outlined' disabled={!row.isDeploy}>Run</Button>
+                    <Button  variant='outlined' color='error' disabled={!row.isDeploy}>Delete</Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          </FixedTable>
         </TableContainer>
       </Card>
       <LinkToDeploy href='/deploy'>
@@ -91,4 +107,4 @@ const ProjectsTable: FC = () => {
   )
 }
 
-export default ProjectsTable
+export default DashBoardProjectTable
