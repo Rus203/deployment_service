@@ -7,7 +7,7 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { IMiniBack } from "../interface/miniback.interface";
 import { RootState } from "../store";
-import { setCredentials } from "../store/features";
+import { updateCredentials } from "../store/features";
 
 const BASE_BACK_URL =
   process.env.NODE_ENV === "production"
@@ -47,7 +47,7 @@ const baseQueryWithReauth: BaseQueryFn<
       );
 
       if (!data) {
-        api.dispatch(setCredentials({ accessToken: null, refreshToken: null }));
+        api.dispatch(updateCredentials({ accessToken: null, refreshToken: null }));
       }
 
       if (
@@ -60,7 +60,7 @@ const baseQueryWithReauth: BaseQueryFn<
       ) {
         const { accessToken, refreshToken } = data;
 
-        api.dispatch(setCredentials({ accessToken, refreshToken }));
+        api.dispatch(updateCredentials({ accessToken, refreshToken }));
         result = await baseQuery(args, api, extraOptions);
       }
     }

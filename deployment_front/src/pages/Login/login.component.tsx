@@ -56,16 +56,12 @@ const Login: FC = () => {
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log('data: ', data)
     try {
-      const tokens = await login(data).unwrap();
-      console.log('tokens ', tokens);
-      console.log(tokens);
-      dispatch(setCredentials(tokens));
+      const answer = await login(data).unwrap();
+      dispatch(setCredentials(answer));
       navigate("/");
     } catch (error: any) {
       setShowAlert(true);
-      console.log(error)
       setErrorMessage(error.data.message);
     }
   };
