@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { Project } from "./project.component";
 
-const Component: FC<{ hasAccess: boolean }> = ({ hasAccess = false }) => {
-  return <Project hasAccess={hasAccess} />;
+const Component: FC = () => {
+  return <Project />;
 };
 
 export default Component;

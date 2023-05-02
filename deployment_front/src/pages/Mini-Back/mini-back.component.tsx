@@ -25,7 +25,7 @@ interface IMiniBack {
   sshServerPrivateKey: FileList,
 } 
 
-export const MiniBack: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
+export const MiniBack: FC = () => {
   const { register, handleSubmit, watch, formState: {errors} } = useForm<IMiniBack>({
     mode: 'onChange'
   });
@@ -43,7 +43,7 @@ export const MiniBack: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
     navigate('/');
   }
 
-  return !hasAccess ? <Navigate to="/login" replace={true} /> : (
+  return (
     <Container>
         <FormContainer>
           <ProjectOptionsContainer>

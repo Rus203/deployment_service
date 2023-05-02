@@ -1,12 +1,11 @@
 import { FC } from 'react';
-import { Navigate } from 'react-router-dom';
 import GraphPie from '../../Components/GraphPie/graph-pie.components';
 import InfoTable from '../../Components/InfoTable/info-table.component';
 import { GraphsContainer, TableContainer, Wrapper } from './graphs.styles';
 
 
 
-const Graphs: FC<{ hasAccess: boolean }> = ({ hasAccess }) => {
+const Graphs: FC = () => {
 
   const data1 = [
     {
@@ -46,9 +45,7 @@ const Graphs: FC<{ hasAccess: boolean }> = ({ hasAccess }) => {
   ]
 
 
-  return !hasAccess
-    ? <Navigate to="/login" replace={true} />
-    : <Wrapper>
+  return <Wrapper>
       <GraphsContainer>
         <GraphPie data={data1} />
         <GraphPie data={data2} />

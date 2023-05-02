@@ -17,8 +17,9 @@ import Typography from '@mui/material/Typography'
 
 import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 
-import { useNavigate } from 'react-router-dom'
 import Link from '../../../../Components/Link/LInk'
+import { logOut } from '../../../../store/features'
+import { useAppDispatch } from '../../../../store/hooks'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -31,20 +32,16 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 
 const UserDropdown = () => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-
-  const router = useNavigate()
+  const dispatch = useAppDispatch()
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
   }
 
   const handleDropdownClose = (url?: string) => {
-    // if (url) {
-    //   router.push(url)
-    // }
     setAnchorEl(null)
+    dispatch(logOut());
   }
-
 
   return (
     <Fragment>
@@ -81,9 +78,6 @@ const UserDropdown = () => {
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
-              {/* <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                Admin
-              </Typography> */}
             </Box>
           </Box>
         </Box>

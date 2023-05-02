@@ -16,7 +16,6 @@ import {
   FormHelperText,
   FileInput,
 } from "./project.styles";
-import { Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 
 interface IProject {
@@ -28,7 +27,7 @@ interface IProject {
   sshGitPrivateKey: FileList
 } 
 
-export const Project: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
+export const Project: FC = () => {
   const { register, handleSubmit, watch, formState: {errors} } = useForm<IProject>({
     mode: 'onChange'
   });
@@ -41,7 +40,7 @@ export const Project: FC<{hasAccess: boolean }> = ({ hasAccess = false }) => {
     console.log(data);
   }
 
-  return !hasAccess ? <Navigate to="/login" replace={true} /> : (
+  return (
     <Container>
         <FormContainer>
           <ProjectOptionsContainer>
