@@ -7,3 +7,14 @@ export const BoxStyled = styled(Box)`
   align-items: center;
   justify-content: center;
 `;
+
+export const StyledAlert = styled(Box)`
+  position: absolute;
+  top: 1.5%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+`

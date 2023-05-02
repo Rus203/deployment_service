@@ -4,11 +4,20 @@ import { RootState } from "../store";
 interface IInitialState {
   accessToken: string | null;
   refreshToken: string | null;
+  name: string | null;
+  email: string | null;
+}
+
+interface IUpdateTokens {
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
 const initialState: IInitialState = {
   accessToken: null,
   refreshToken: null,
+  name: null,
+  email: null,
 };
 
 const authSlice = createSlice({
@@ -17,15 +26,17 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      { payload: { accessToken, refreshToken } }: PayloadAction<IInitialState>
+      action: PayloadAction<IUpdateTokens>
     ) => {
-      state.accessToken = accessToken;
-      state.refreshToken = refreshToken;
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
     },
 
     logOut: (state) => {
       state.accessToken = null;
       state.refreshToken = null;
+      state.name = null;
+      state.email = null;
     },
   },
 });

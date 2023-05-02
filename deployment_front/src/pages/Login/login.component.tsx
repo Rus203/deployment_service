@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, MouseEvent, useState } from "react";
+import { ChangeEvent, FC, MouseEvent, useState, useEffect } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -13,20 +13,17 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 
-import { yupResolver } from '@hookform/resolvers/yup';
-import { FormHelperText } from "@mui/material";
+import { Alert, FormHelperText } from "@mui/material";
 import EyeOffOutline from "mdi-material-ui/EyeOffOutline";
 import EyeOutline from "mdi-material-ui/EyeOutline";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import * as yup from "yup";
 import Link from "../../Components/Link/LInk";
 import { useLoginUserMutation } from "../../services";
 import { setCredentials } from "../../store/features";
 import { useAppDispatch } from "../../store/hooks";
 import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1";
-import { BoxStyled } from "./login.styles";
-import { authSchema } from "../../schemas/AuthSchema";
+import { BoxStyled, StyledAlert } from "./login.styles";
 
 interface State {
   password: string;
@@ -35,7 +32,7 @@ interface State {
 
 
 type Inputs = {
-  login: string;
+  email: string;
   password: string;
 };
 
@@ -45,8 +42,9 @@ const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
 
 const Login: FC = () => {
   const dispatch = useAppDispatch();
+  const [isShowAlert, setShowAlert] = useState<boolean>(false);
   const [login, { isLoading }] = useLoginUserMutation();
-  const [resErrors, setResErrors] = useState<any>();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const [values, setValues] = useState<State>({
     password: "",
@@ -56,15 +54,19 @@ const Login: FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>({ resolver: yupResolver(authSchema) });
+  } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log('data: ', data)
     try {
       const tokens = await login(data).unwrap();
+      console.log('tokens ', tokens);
       console.log(tokens);
       dispatch(setCredentials(tokens));
       navigate("/");
-    } catch (error: unknown) {
-      setResErrors(error)
+    } catch (error: any) {
+      setShowAlert(true);
+      console.log(error)
+      setErrorMessage(error.data.message);
     }
   };
 
@@ -81,7 +83,16 @@ const Login: FC = () => {
     event.preventDefault();
   };
 
+  useEffect(() => {
+    if (isShowAlert) {
+      console.log('show alert');
+      const timerId = setTimeout(() => setShowAlert(false), 3000);
+      return () => clearTimeout(timerId);
+    }
+  }, [isShowAlert])
+
   return (
+    <>
     <BoxStyled>
       <Card sx={{ zIndex: 1 }}>
         <CardContent
@@ -120,25 +131,35 @@ const Login: FC = () => {
             </Typography>
           </Box>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <FormControl fullWidth>
+          <FormControl fullWidth sx={{ marginTop: 4 }}>
               <TextField
-                error={!!errors.login?.message || !!resErrors?.data?.message}
+                error={!!errors.email?.message}
                 fullWidth
-                type="text"
-                label="Login"
-                onKeyDown={() => setResErrors(null)}
-                {...register("login")}
+                type="email"
+                label="Email"
+                { ...register("email", {
+                  required: 'Email is required',
+                  validate: value => value.length <= 49 || 'Too many characters',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 
+                    message: "Please enter a valid Email!"
+                }
+                })}
               />
-              <FormHelperText error>{errors.login?.message || resErrors?.data?.message}</FormHelperText>
+              {errors.email && (
+                <FormHelperText>{errors.email.message}</FormHelperText>
+              )}
             </FormControl>
-            <FormControl error={!!errors.password?.message || !!resErrors?.data?.message} fullWidth sx={{ marginTop: 4 }}>
+            <FormControl error={!!errors.password?.message} fullWidth sx={{ marginTop: 4 }}>
               <InputLabel htmlFor="auth-login-password">Password</InputLabel>
               <OutlinedInput
                 label="Password"
                 value={values.password}
-                onKeyDown={() => setResErrors(null)}
                 id="auth-login-password"
-                {...register("password")}
+                {...register("password", {
+                  required: 'Password is required',
+                  validate: value => value.length <= 49 || 'Too many characters'
+                })}
                 onChange={handleChange("password")}
                 type={values.showPassword ? "text" : "password"}
                 endAdornment={
@@ -154,7 +175,7 @@ const Login: FC = () => {
                   </InputAdornment>
                 }
               />
-              <FormHelperText error>{errors.password?.message || resErrors?.data.message}</FormHelperText>
+              <FormHelperText>{errors.password?.message}</FormHelperText>
             </FormControl>
             <Box
               sx={{
@@ -194,7 +215,13 @@ const Login: FC = () => {
         </CardContent>
       </Card>
       <FooterIllustrationsV1 />
-    </BoxStyled>
+    </BoxStyled> {(errorMessage !== null && isShowAlert)
+      ? <StyledAlert>
+          <Alert severity="error">{errorMessage}</Alert>
+        </StyledAlert>
+      : null
+      }
+    </>
   );
 };
 

@@ -6,7 +6,7 @@ import {
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
 import { IProject } from "../interface/project.interface";
-import { IAuthDto, ILoginUserResult } from "../types";
+import { ILogin, IRegister, ILoginUserResult } from "../types";
 import { RootState } from "../store";
 import { setCredentials } from "../store/features";
 
@@ -122,7 +122,7 @@ export const projectsApi = createApi({
       query: (id) => ({ url: `project/${id}/deploy`, method: "POST" }),
     }),
 
-    registerUser: build.mutation<undefined, IAuthDto>({
+    registerUser: build.mutation<undefined, IRegister>({
       query: (body) => ({
         url: "auth/sign-up",
         method: "POST",
@@ -130,7 +130,7 @@ export const projectsApi = createApi({
       }),
     }),
 
-    loginUser: build.mutation<ILoginUserResult, IAuthDto>({
+    loginUser: build.mutation<ILoginUserResult, ILogin>({
       query: (body) => ({
         url: "auth/sign-in",
         method: "POST",
