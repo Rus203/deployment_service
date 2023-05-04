@@ -211,7 +211,8 @@ const Login: FC = () => {
         </CardContent>
       </Card>
       <FooterIllustrationsV1 />
-    </BoxStyled> {(errorMessage !== null && isShowAlert)
+    </BoxStyled>
+      {(errorMessage !== null && isShowAlert)
       ? <StyledAlert>
           <Alert severity="error">{errorMessage}</Alert>
         </StyledAlert>

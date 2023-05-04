@@ -5,9 +5,9 @@ import {
   createApi,
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
-import { IMiniBack } from "../interface/miniback.interface";
+import { IMiniBackRequest, IMiniBackAnswer } from "../interface/miniback.interface";
 import { RootState } from "../store";
-import { updateCredentials } from "../store/features";
+import { updateCredentials, logOut } from "../store/features";
 
 const BASE_BACK_URL =
   process.env.NODE_ENV === "production"
@@ -47,7 +47,7 @@ const baseQueryWithReauth: BaseQueryFn<
       );
 
       if (!data) {
-        api.dispatch(updateCredentials({ accessToken: null, refreshToken: null }));
+        api.dispatch(logOut());
       }
 
       if (
@@ -75,7 +75,7 @@ export const minibacksApi = createApi({
   tagTypes: ["Miniback"],
 
   endpoints: (build) => ({
-    getMinibacks: build.query<IMiniBack[], undefined>({
+    getMinibacks: build.query<IMiniBackAnswer[], undefined>({
       query: () => "mini-back",
       providesTags: (result) =>
         result
@@ -86,13 +86,13 @@ export const minibacksApi = createApi({
           : ["Miniback"],
     }),
 
-    getMiniback: build.query<IMiniBack, string>({
+    getMiniback: build.query<IMiniBackAnswer, string>({
       query: (id) => `mini-back/${id}`,
       providesTags: (result) =>
         result ? [{ type: "Miniback" as const, id: result.id }] : ["Miniback"],
     }),
 
-    createMiniback: build.mutation<IMiniBack, FormData>({
+    createMiniback: build.mutation<IMiniBackAnswer, FormData>({
       query: (body) => ({
         url: "mini-back",
         method: "POST",
@@ -101,7 +101,7 @@ export const minibacksApi = createApi({
       invalidatesTags: ["Miniback"],
     }),
 
-    updateMiniback: build.mutation<IMiniBack, { body: FormData; id: string }>({
+    updateMiniback: build.mutation<IMiniBackRequest, { body: FormData; id: string }>({
       query: ({ id, body }) => ({
         url: `miniback/${id}`,
         method: "PATCH",
@@ -118,7 +118,8 @@ export const minibacksApi = createApi({
     }),
 
     deployMiniback: build.mutation<boolean, string>({
-      query: (id) => ({ url: `mini-back/${id}/deploy`, method: "POST" }),
+      query: (id) => ({ url: `mini-back/deploy/${id}`, method: "POST" }),
+      invalidatesTags: ["Miniback"],
     }),
   }),
 });
@@ -127,12 +128,13 @@ export const {
   useCreateMinibackMutation,
   useDeleteMinibackMutation,
   useGetMinibackQuery,
+  useLazyGetMinibacksQuery,
   useDeployMinibackMutation,
   useGetMinibacksQuery,
 } = minibacksApi;
 
-export const useGetProjectLazyQuery =
+export const useGetMiniBackLazyQuery =
   minibacksApi.endpoints.getMinibacks.useLazyQuery;
 
-export const useGetProjectsLazyQuery =
+export const useGetMiniBacksLazyQuery =
   minibacksApi.endpoints.getMinibacks.useLazyQuery;

@@ -1,5 +1,6 @@
 import { FC } from 'react'
 import {
+  Alert,
   Button,
   TextField,
 } from "@mui/material";
@@ -14,36 +15,43 @@ import {
   SectionInputs,
   ButtonsContainer,
   FormHelperText,
-  FileInput,
+  FileInput
 } from "./mini-back.styles";
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useCreateMinibackMutation } from '../../services';
+import Spinner from '../../Components/Spinner'
 
-interface IMiniBack {
+interface IMiniBackInputs {
   name: string,
   sshConnectionString: string,
   sshServerPrivateKey: FileList,
-} 
+}
 
 export const MiniBack: FC = () => {
-  const { register, handleSubmit, watch, formState: {errors} } = useForm<IMiniBack>({
+  const { register, handleSubmit, watch, formState: {errors} } = useForm<IMiniBackInputs>({
     mode: 'onChange'
   });
 
+  const [ createMiniBack, { isLoading }] = useCreateMinibackMutation()
   const navigate = useNavigate();
 
   const sshServerPrivateKey = watch('sshServerPrivateKey');
 
-  const onSubmit = async (data: object) => {
-    // here we will send data to the backend
-    console.log(data);
+  const onSubmit = async (data: IMiniBackInputs) => {
+    const formData = new FormData()
+    formData.append('name', data.name)
+    formData.append('sshConnectionString', data.sshConnectionString)
+    formData.append('sshServerPrivateKey', data.sshServerPrivateKey[0])
+    
+    createMiniBack(formData).then(() => navigate('/'))
   }
 
   const comeBack = () => {
     navigate('/');
   }
 
-  return (
+  return isLoading ? <Spinner typeOfMessages={null} /> : (
     <Container>
         <FormContainer>
           <ProjectOptionsContainer>

@@ -1,8 +1,16 @@
-export interface IMiniBack {
+import { ProjectState } from '../utils/project-state.enum'
+
+export interface IMiniBackAnswer {
   id: string;
   name: string;
   serverUrl: string;
   nameRemoteRepository: string;
   userId: string;
-  isDeploy: boolean;
+  deployState: ProjectState;
+}
+
+export interface IMiniBackRequest {
+  name: string;
+  sshConnectionString: string;
+  sshServerPrivateKey: File;
 }
