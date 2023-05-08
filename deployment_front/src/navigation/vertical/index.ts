@@ -17,7 +17,7 @@ const navigation = (): any => {
     {
       title: "Diagrams",
       icon: BarChartIcon,
-      path: "/diagrams",
+      path: "/mini-back/diagrams",
     },
     // {
     //   sectionTitle: "            ",

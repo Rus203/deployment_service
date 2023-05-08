@@ -16,7 +16,9 @@ import {
   FormHelperText,
   FileInput,
 } from "./project.styles";
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form';
+import { useCreateProjectMutation, useGetMinibackQuery, useGetProjectsQuery } from '../../services';
 
 interface IProject {
   name: string,
@@ -32,12 +34,30 @@ export const Project: FC = () => {
     mode: 'onChange'
   });
 
+  const navigate = useNavigate()
+  const location = useLocation()
+  const miniBackId = location.pathname.split('/')[2]
+  const { data: miniback } = useGetMinibackQuery(miniBackId)
+  const [addProject] = useCreateProjectMutation()
+  const { data: projects } = useGetProjectsQuery({serverUrl: miniback?.serverUrl, port: miniback?.port})
+
   const envFile = watch('envFile');
   const sshGitPrivateKey = watch('sshGitPrivateKey')
 
-  const onSubmit = async (data: object) => {
+  const onSubmit = async (data: IProject) => {
     // here we will send data to the backend
-    console.log(data);
+    const formData = new FormData()
+    formData.append('name', data.name)
+    formData.append('email', data.email)
+    formData.append('port', data.port.toString())
+    formData.append('gitLink', data.gitLink)
+    formData.append('envFile', data.envFile[0])
+    formData.append('sshGitPrivateKey', data.sshGitPrivateKey[0])
+    addProject({ serverUrl: miniback?.serverUrl, port: miniback?.port, body: formData})
+  }
+
+  const comeBack = (): void => {
+    navigate(`/mini-back/${miniBackId}`)
   }
 
   return (
@@ -152,6 +172,14 @@ export const Project: FC = () => {
                         isNumber: (value) => !isNaN(value) || 'Port must be a number',
                         min: (value: any) => parseInt(value) >= 0 || 'Port can not be less than 0',
                         max: (value: any) => parseInt(value) <= 65535 || 'Port can not be bigger than 65535',
+                        isUnique: (value: number) => {
+                          if (projects !== undefined) {
+                            const result = projects.find(item => value === item.port)
+                            return result !== undefined ? "This port has already busy" : true
+                          }
+
+                          return true
+                        }
                       },
                     })}
                   />
@@ -189,7 +217,7 @@ export const Project: FC = () => {
               </SectionInputs>
             </Section>
             <ButtonsContainer>
-            <Button variant="outlined">
+            <Button onClick={comeBack} variant="outlined">
                 Back
               </Button>
               <Button variant="outlined" onClick={handleSubmit(onSubmit)} >

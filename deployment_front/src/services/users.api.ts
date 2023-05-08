@@ -5,9 +5,9 @@ import {
   createApi,
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
-import { IMiniBack } from "../interface/miniback.interface";
+import { ILogin, IRegister, ILoginUserResult } from "../types";
 import { RootState } from "../store";
-import { updateCredentials, logOut } from "../store/features";
+import { updateCredentials } from "../store/features";
 
 const BASE_BACK_URL =
   process.env.NODE_ENV === "production"
@@ -47,7 +47,7 @@ const baseQueryWithReauth: BaseQueryFn<
       );
 
       if (!data) {
-        api.dispatch(logOut());
+        api.dispatch(updateCredentials({ accessToken: null, refreshToken: null }));
       }
 
       if (
@@ -68,62 +68,32 @@ const baseQueryWithReauth: BaseQueryFn<
   return result;
 };
 
-export const minibacksApi = createApi({
-  reducerPath: "minibacksApi",
+export const usersApi = createApi({
+  reducerPath: "projectsApi",
   baseQuery: baseQueryWithReauth,
 
-  tagTypes: ["Miniback"],
+  tagTypes: ["Project", "User"],
 
   endpoints: (build) => ({
-    getMinibacks: build.query<IMiniBack[], undefined>({
-      query: () => "mini-back",
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: "Miniback" as const, id })),
-              "Miniback",
-            ]
-          : ["Miniback"],
-    }),
-
-    getMiniback: build.query<IMiniBack, string>({
-      query: (id) => `mini-back/${id}`,
-      providesTags: (result) =>
-        result ? [{ type: "Miniback" as const, id: result.id }] : ["Miniback"],
-    }),
-
-    createMiniback: build.mutation<IMiniBack, FormData>({
+    registerUser: build.mutation<undefined, IRegister>({
       query: (body) => ({
-        url: "mini-back",
+        url: "auth/sign-up",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Miniback"],
     }),
 
-    deleteMiniback: build.mutation<boolean, string>({
-      query: (id) => ({ url: `mini-back/${id}`, method: "DELETE" }),
-      invalidatesTags: ["Miniback"],
-    }),
-
-    deployMiniback: build.mutation<boolean, string>({
-      query: (id) => ({ url: `mini-back/deploy/${id}`, method: "POST" }),
-      invalidatesTags: ["Miniback"],
+    loginUser: build.mutation<ILoginUserResult, ILogin>({
+      query: (body) => ({
+        url: "auth/sign-in",
+        method: "POST",
+        body,
+      }),
     }),
   }),
 });
 
 export const {
-  useCreateMinibackMutation,
-  useDeleteMinibackMutation,
-  useGetMinibackQuery,
-  useLazyGetMinibacksQuery,
-  useDeployMinibackMutation,
-  useGetMinibacksQuery,
-} = minibacksApi;
-
-export const useGetMiniBackLazyQuery =
-  minibacksApi.endpoints.getMinibacks.useLazyQuery;
-
-export const useGetMiniBacksLazyQuery =
-  minibacksApi.endpoints.getMinibacks.useLazyQuery;
+  useLoginUserMutation,
+  useRegisterUserMutation,
+} = usersApi;

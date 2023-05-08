@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import GraphPie from '../../Components/GraphPie/graph-pie.components';
 import InfoTable from '../../Components/InfoTable/info-table.component';
-import { GraphsContainer, TableContainer, Wrapper } from './graphs.styles';
+import { GraphsContainer, TableContainer, Wrapper } from './diagrams.styles';
 
 
 

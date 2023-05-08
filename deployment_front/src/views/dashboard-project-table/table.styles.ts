@@ -16,3 +16,9 @@ export const FixedTable = styled.div`
   height: 70vh;
   overflow-y: scroll;
 `
+
+export const ControlButtons = styled.div`
+  display: flex;
+  column-gap: 20px;
+  justify-content: flex-end;
+`

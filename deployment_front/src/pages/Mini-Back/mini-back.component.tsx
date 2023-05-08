@@ -17,10 +17,11 @@ import {
   FormHelperText,
   FileInput
 } from "./mini-back.styles";
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useCreateMinibackMutation } from '../../services';
+import { useCreateMinibackMutation, useGetMinibacksQuery } from '../../services';
 import Spinner from '../../Components/Spinner'
+import { IMiniBack } from '../../interface/miniback.interface';
 
 interface IMiniBackInputs {
   name: string,
@@ -33,6 +34,7 @@ export const MiniBack: FC = () => {
     mode: 'onChange'
   });
 
+  const { data } = useGetMinibacksQuery(undefined)
   const [ createMiniBack, { isLoading }] = useCreateMinibackMutation()
   const navigate = useNavigate();
 
@@ -88,7 +90,20 @@ export const MiniBack: FC = () => {
                       pattern: {
                         value: /^[a-zA-Z]+@[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/,
                         message: "Please Enter a valid ssh connection string"
-                    }
+                      },
+                      validate: (value: string) => {
+                        const testUrl = value.split('@')[1]
+                        if (data !== undefined) {
+                          let result = data.find((item: IMiniBack) => {
+                            const url = item.serverUrl
+                              return testUrl === url
+                          })
+                          
+                          return result ? "This server has already busy" : true
+                        }
+
+                        return true
+                      }
                     })}
                   /> 
                   {errors.sshConnectionString && (

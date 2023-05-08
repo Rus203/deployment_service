@@ -9,50 +9,19 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
-import { useNavigate } from 'react-router-dom'
-import { IProject } from '../../interface/project.interface'
-import { Container, LinkToDeploy, FixedTable } from './table.styles'
+import { useLocation } from 'react-router-dom'
+import { Container, LinkToDeploy, FixedTable, ControlButtons } from './table.styles'
+import { useGetMinibackQuery, useGetProjectsQuery, useDeleteProjectMutation } from '../../services'
+import { ProjectState } from '../../utils/project-state.enum'
+
 
 
 const DashBoardProjectTable: FC = () => {
-  // const { data = [] } = useGetProjectsQuery(undefined)
-  const data: IProject[] = [
-    // mock data
-    {
-      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
-      email: 'test@gmail.com',
-      port: 10000,
-      name: 'test',
-      gitLink: 'git@github.com:Rus203/mini_back.git',
-      isDeploy: true
-    }, 
-    {
-      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
-      email: 'test@gmail.com',
-      port: 10000,
-      name: 'test',
-      gitLink: 'git@github.com:Rus203/mini_back.git',
-      isDeploy: true
-    },
-    {
-      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
-      email: 'test@gmail.com',
-      port: 10000,
-      name: 'test',
-      gitLink: 'git@github.com:Rus203/mini_back.git',
-      isDeploy: true
-    },
-    {
-      id: '61f0c404-5cb3-11e7-907b-a6006ad3dba0',
-      email: 'test@gmail.com',
-      port: 10000,
-      name: 'test',
-      gitLink: 'git@github.com:Rus203/mini_back.git',
-      isDeploy: true
-    }
-  ]
-
-  const navigate = useNavigate();
+  const location = useLocation()
+  const miniBackId = location.pathname.split('/')[2]
+  const { data: miniback } = useGetMinibackQuery(miniBackId)
+  const { data: projects } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
+  const [ deleteProject ] = useDeleteProjectMutation()
 
   return (
     <Container>
@@ -71,11 +40,10 @@ const DashBoardProjectTable: FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {
-                data.map((row: IProject, index) => (
+              { projects !== undefined && projects.map((row, index) => (
                 <TableRow
                   hover
-                  key={row.id}
+                  key={index}
                   sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
                 >
                   <TableCell>{index + 1}</TableCell>
@@ -87,11 +55,17 @@ const DashBoardProjectTable: FC = () => {
                   </TableCell>
                   <TableCell>{row.gitLink}</TableCell>
                   <TableCell>{row.port}</TableCell>
-                  <TableCell>{row.isDeploy ? 'deployed' : 'not deployed'}</TableCell>
+                  <TableCell>{row.state}</TableCell>
                   <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-                    <Button variant='outlined' disabled={row.isDeploy}>Deploy</Button>
-                    <Button variant='outlined' disabled={!row.isDeploy}>Run</Button>
-                    <Button  variant='outlined' color='error' disabled={!row.isDeploy}>Delete</Button>
+                    <Button variant='outlined' disabled={row.state !== ProjectState.UNDEPLOYED}>Deploy</Button>
+                    <Button
+                      onClick={() => deleteProject({
+                        serverUrl: miniback?.serverUrl, port: miniback?.port, id: row.id
+                      })}
+                      variant='outlined'
+                      color='error'
+                      >
+                        Delete</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -100,9 +74,14 @@ const DashBoardProjectTable: FC = () => {
           </FixedTable>
         </TableContainer>
       </Card>
-      <LinkToDeploy href='/deploy'>
-        <Button variant="contained">Create</Button>
-      </LinkToDeploy>
+      <ControlButtons>
+        <LinkToDeploy href='/'>
+          <Button variant="contained">Back</Button>
+        </LinkToDeploy>
+        <LinkToDeploy href='project'>
+          <Button variant="contained">Create</Button>
+        </LinkToDeploy>
+      </ControlButtons>
     </Container>
   )
 }

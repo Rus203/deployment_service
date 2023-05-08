@@ -1,83 +1,23 @@
 import {
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError,
   createApi,
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
 import { IProject } from "../interface/project.interface";
-import { ILogin, IRegister, ILoginUserResult } from "../types";
-import { RootState } from "../store";
-import { updateCredentials } from "../store/features";
-
-const BASE_BACK_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_BACK_DEPLOYMENT_URL
-    : process.env.REACT_APP_BACK_DEV_URL;
+import { LargeNumberLike } from "crypto";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: BASE_BACK_URL,
-  prepareHeaders: (headers, { getState }) => {
-    const accessToken = (getState() as RootState).auth.accessToken;
-    if (accessToken) {
-      headers.set("authorization", `Bearer ${accessToken}`);
-    }
-    return headers;
-  },
+  baseUrl: '',
 });
-
-const baseQueryWithReauth: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions);
-
-  if (result.error && result.error.status === 401) {
-    const { getState } = api;
-    const refreshToken = (getState() as RootState).auth.refreshToken;
-    if (refreshToken) {
-      const { data } = await baseQuery(
-        {
-          url: "/auth/refresh",
-          body: { refreshToken },
-          method: "POST",
-        },
-        api,
-        extraOptions
-      );
-
-      if (!data) {
-        api.dispatch(updateCredentials({ accessToken: null, refreshToken: null }));
-      }
-
-      if (
-        data &&
-        typeof data === "object" &&
-        "accessToken" in data &&
-        "refreshToken" in data &&
-        typeof data.accessToken === "string" &&
-        typeof data.refreshToken === "string"
-      ) {
-        const { accessToken, refreshToken } = data;
-
-        api.dispatch(updateCredentials({ accessToken, refreshToken }));
-        result = await baseQuery(args, api, extraOptions);
-      }
-    }
-  }
-  return result;
-};
 
 export const projectsApi = createApi({
   reducerPath: "projectsApi",
-  baseQuery: baseQueryWithReauth,
+  baseQuery: baseQuery,
 
-  tagTypes: ["Project", "User"],
+  tagTypes: ["Project"],
 
   endpoints: (build) => ({
-    getProjects: build.query<IProject[], undefined>({
-      query: () => "project",
+    getProjects: build.query<IProject[], { serverUrl?: string, port?: number }>({
+      query: ({ serverUrl, port }) => serverUrl && port ? `http://${serverUrl}:${port}/project` : '',
       providesTags: (result) =>
         result
           ? [
@@ -93,12 +33,12 @@ export const projectsApi = createApi({
         result ? [{ type: "Project" as const, id: result.id }] : ["Project"],
     }),
 
-    createProject: build.mutation<IProject, FormData>({
-      query: (body) => ({
-        url: "project",
+    createProject: build.mutation<IProject, { serverUrl?: string, port?: number, body: FormData}>({
+      query: ({ body, port, serverUrl }) => serverUrl && port ? ({
+        url: `http://${serverUrl}:${port}/project/`,
         method: "POST",
         body,
-      }),
+      }) : '',
       invalidatesTags: ["Project"],
     }),
 
@@ -113,29 +53,13 @@ export const projectsApi = createApi({
       ],
     }),
 
-    deleteProject: build.mutation<boolean, string>({
-      query: (id) => ({ url: `project/${id}`, method: "DELETE" }),
+    deleteProject: build.mutation<boolean, { serverUrl?: string, port?: number, id: string}>({
+      query: ({ serverUrl, port, id}) => serverUrl && port ? ({ url: `http://${serverUrl}:${port}/project/${id}/delete`, method: "POST" }) : '',
       invalidatesTags: ["Project"],
     }),
 
     deployProject: build.mutation<boolean, string>({
       query: (id) => ({ url: `project/${id}/deploy`, method: "POST" }),
-    }),
-
-    registerUser: build.mutation<undefined, IRegister>({
-      query: (body) => ({
-        url: "auth/sign-up",
-        method: "POST",
-        body,
-      }),
-    }),
-
-    loginUser: build.mutation<ILoginUserResult, ILogin>({
-      query: (body) => ({
-        url: "auth/sign-in",
-        method: "POST",
-        body,
-      }),
     }),
   }),
 });
@@ -147,8 +71,6 @@ export const {
   useUpdateProjectMutation,
   useDeployProjectMutation,
   useGetProjectQuery,
-  useLoginUserMutation,
-  useRegisterUserMutation,
 } = projectsApi;
 
 export const useGetProjectLazyQuery =
