@@ -72,7 +72,7 @@ export class SshProvider extends ChildProcessCommandProvider {
             `cd ~/${nameRemoteRepository};` +
             'chmod 600 id_rsa;' +
             'ssh-add id_rsa;' +
-            `git clone ${gitProjectLink}`,
+            `git clone -b refactor ${gitProjectLink}`,
         ],
         {
           shell: true,
@@ -121,7 +121,8 @@ export class SshProvider extends ChildProcessCommandProvider {
           '-i',
           pathToSSHPrivateKey,
           `cd ${nameRemoteRepository}/mini_back;` +
-            'docker compose down --rmi all;' +
+            'docker rm -f $(docker ps -aq);' +
+            'docker rmi -f $(docker images -aq);' +
             `rm -r ~/${nameRemoteRepository};`,
         ],
         {

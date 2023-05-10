@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
-import { normalizeProjectName } from 'src/utils';
+import { ProjectState, normalizeProjectName } from 'src/utils';
 
 @Injectable()
 export class MiniBackService {
@@ -42,9 +42,11 @@ export class MiniBackService {
     const candidate = await this.getOne({ userId: dto.userId, serverUrl });
 
     if (candidate !== null) {
+      console.log(candidate);
       throw new BadRequestException('This server is already busy');
     }
 
+    dto.port = Number(process.env.MINI_BACK_PORT);
     dto.name = normalizeProjectName(dto.name);
     await this.fileEncryptorProvider.encryptFilesOnPlace([
       dto.sshServerPrivateKeyPath,
@@ -82,8 +84,8 @@ export class MiniBackService {
       throw new NotFoundException('The instance of mini back not found');
     }
 
-    const isDeploy = currentMiniBack.isDeploy;
-    if (isDeploy) {
+    const deployState = currentMiniBack.deployState;
+    if (deployState === ProjectState.DEPLOYED) {
       throw new BadRequestException(
         'This instance of mini_back has already places',
       );
@@ -113,6 +115,15 @@ export class MiniBackService {
 
     miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
     sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
+
+    try {
+      const contents = await fs.readFile(sshServerPrivateKeyPath, {
+        encoding: 'utf8',
+      });
+      console.log(contents);
+    } catch (err) {
+      console.error(err.message);
+    }
 
     try {
       // place the private key of mini back
@@ -189,6 +200,9 @@ export class MiniBackService {
       throw new NotFoundException('Such a mini back was not found');
     }
 
-    await this.miniBackRepository.update({ id }, { isDeploy: true });
+    await this.miniBackRepository.update(
+      { id },
+      { deployState: ProjectState.DEPLOYED },
+    );
   }
 }

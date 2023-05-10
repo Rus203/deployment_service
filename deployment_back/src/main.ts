@@ -11,14 +11,19 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The deployment service API description')
+    .setTitle('Deployment back api')
+    .setDescription(
+      "Here's a brief introduction to your backend API that allows" +
+        'creating and managing minibecks. Our API provides several' +
+        'endpoints that allow creating, retrieving, updating, and deleting minibecks.',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+  app.enableCors();
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

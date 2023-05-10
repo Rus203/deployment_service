@@ -6,6 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
+import { ProjectState } from '../utils';
 
 @Entity('mini-backs')
 export class MiniBack {
@@ -37,6 +38,13 @@ export class MiniBack {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @Column({ default: false, type: 'boolean' })
-  isDeploy: boolean;
+  @Column({
+    default: ProjectState.UNDEPLOYED,
+    type: 'enum',
+    enum: ProjectState,
+  })
+  deployState: ProjectState;
+
+  @Column()
+  port: number;
 }
