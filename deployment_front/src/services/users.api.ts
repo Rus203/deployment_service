@@ -69,10 +69,8 @@ const baseQueryWithReauth: BaseQueryFn<
 };
 
 export const usersApi = createApi({
-  reducerPath: "projectsApi",
+  reducerPath: "usersApi",
   baseQuery: baseQueryWithReauth,
-
-  tagTypes: ["Project", "User"],
 
   endpoints: (build) => ({
     registerUser: build.mutation<undefined, IRegister>({
@@ -88,7 +86,7 @@ export const usersApi = createApi({
         url: "auth/sign-in",
         method: "POST",
         body,
-      }),
+      })
     }),
   }),
 });

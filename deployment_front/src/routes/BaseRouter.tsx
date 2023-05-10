@@ -6,7 +6,7 @@ import ProjectDashboard from "../pages/Project-dashboard";
 import Login from "../pages/Login";
 import UserLayout from "../layouts/UserLayout";
 import Project from "../pages/Project";
-import Graph from "../pages/Diagrams/diagrams.component";
+import Diagrams from "../pages/Diagrams";
 import DashboardMiniBack from "../pages/mini-back-dashboard/project-dashboard.component";
 import MiniBack from '../pages/Mini-Back';
 import ProtectedComponent from "../Components/Protected-Component";
@@ -23,7 +23,7 @@ const BaseRouter: FC = () => {
             <Route index element={<ProtectedComponent component={DashboardMiniBack} />} />
             <Route path='mini-back'>
             <Route index element={<ProtectedComponent component={MiniBack} />} />
-              <Route path="diagrams" element={<ProtectedComponent component={Graph} /> } />
+              <Route path="diagrams" element={<ProtectedComponent component={Diagrams} /> } />
               <Route path=':miniBackId' element={<ProtectedComponent component={ProjectDashboard} /> } />
               <Route path=":miniBackId/project" element={<ProtectedComponent component={Project} /> } />
           

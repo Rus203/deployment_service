@@ -43,7 +43,7 @@ const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
 const Login: FC = () => {
   const dispatch = useAppDispatch();
   const [isShowAlert, setShowAlert] = useState<boolean>(false);
-  const [login, { isLoading }] = useLoginUserMutation();
+  const [login] = useLoginUserMutation();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const [values, setValues] = useState<State>({
@@ -56,12 +56,14 @@ const Login: FC = () => {
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log(data)
     try {
-      const answer = await login(data).unwrap();
+      const answer = await login(data).unwrap()
       dispatch(setCredentials(answer));
       navigate("/");
     } catch (error: any) {
       setShowAlert(true);
+      console.log(error)
       setErrorMessage(error.data.message);
     }
   };

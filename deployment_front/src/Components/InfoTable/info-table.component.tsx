@@ -24,7 +24,7 @@ const InfoTable = () => {
 
   return (
     <BoxStyled>
-      <ContainerStyled sx={{ width: 550 }} >
+      <ContainerStyled sx={{ width: 420 }} >
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -49,11 +49,6 @@ const InfoTable = () => {
           </TableBody>
         </Table>
       </ContainerStyled>
-      {/* <Typography variant={"h2"}>InfoTable</Typography>
-      <Typography>Total RAM/Free RAM: 8gb/2gb</Typography>
-      <Typography>Total ROM/Free ROM: 120gb/23gb</Typography>
-      <Typography>Total CPU/Free CPU: 100%/56%</Typography> */}
-
     </BoxStyled>
   );
 };

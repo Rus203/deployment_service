@@ -4,6 +4,7 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { IProject } from "../interface/project.interface";
 import { LargeNumberLike } from "crypto";
+import { IStatistic } from "../interface/statictic.interface";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: '',

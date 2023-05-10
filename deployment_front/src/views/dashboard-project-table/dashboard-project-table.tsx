@@ -13,8 +13,7 @@ import { useLocation } from 'react-router-dom'
 import { Container, LinkToDeploy, FixedTable, ControlButtons } from './table.styles'
 import { useGetMinibackQuery, useGetProjectsQuery, useDeleteProjectMutation } from '../../services'
 import { ProjectState } from '../../utils/project-state.enum'
-
-
+import Spinner from '../../Components/Spinner'
 
 const DashBoardProjectTable: FC = () => {
   const location = useLocation()
