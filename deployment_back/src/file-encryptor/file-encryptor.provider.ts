@@ -23,11 +23,12 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
     const commonFolder = path.join(__dirname, '..', '..', 'mini-back-key');
     const miniBackPrivateKey = path.join(commonFolder, 'id_rsa');
 
-    if (existsSync(miniBackPrivateKey)) {
-      await chmod(miniBackPrivateKey, 600);
-      await this.encryptFilesOnPlace([miniBackPrivateKey]);
-      await this.removeUnencryptedFiles(commonFolder);
-    }
+    await chmod(miniBackPrivateKey, 0o600);
+    // if (existsSync(miniBackPrivateKey)) {
+    //   await chmod(miniBackPrivateKey, 600);
+    //   await this.encryptFilesOnPlace([miniBackPrivateKey]);
+    //   await this.removeUnencryptedFiles(commonFolder);
+    // }
   }
 
   private encypt(

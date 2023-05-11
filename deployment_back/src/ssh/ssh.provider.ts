@@ -15,11 +15,26 @@ export class SshProvider extends ChildProcessCommandProvider {
     localDirectory: string,
     remoteDirectory: string,
   ): Promise<boolean> {
+    console.log('localDirectory: ', localDirectory);
+    console.log(fs.existsSync(localDirectory));
+
+    console.log('sshLink ', sshLink);
+
+    console.log('pathToSSHPrivateKey: ', pathToSSHPrivateKey);
+    console.log(fs.existsSync(pathToSSHPrivateKey));
+
     return new Promise((resolve, reject) => {
       const remoteFullPath = sshLink + ':' + remoteDirectory;
       const childProcess = spawn(
         'scp',
-        ['-i', pathToSSHPrivateKey, '-r', localDirectory, remoteFullPath],
+        [
+          '-i',
+          pathToSSHPrivateKey,
+          "-o 'StrictHostKeyChecking=no'",
+          '-r',
+          localDirectory,
+          remoteFullPath,
+        ],
         {
           shell: true,
         },
@@ -64,15 +79,16 @@ export class SshProvider extends ChildProcessCommandProvider {
       const childProcess = spawn(
         'ssh',
         [
+          "-o 'StrictHostKeyChecking=no'",
           '-T',
           sshLink,
           '-i',
           pathToSSHPrivateKey,
           'eval $(ssh-agent -s);' +
-            `cd ~/${nameRemoteRepository};` +
+            `cd /root/${nameRemoteRepository};` +
             'chmod 600 id_rsa;' +
             'ssh-add id_rsa;' +
-            `git clone -b refactor ${gitProjectLink}`,
+            `git clone -b refactor ${gitProjectLink};`,
         ],
         {
           shell: true,
