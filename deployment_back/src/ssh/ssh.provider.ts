@@ -15,14 +15,6 @@ export class SshProvider extends ChildProcessCommandProvider {
     localDirectory: string,
     remoteDirectory: string,
   ): Promise<boolean> {
-    console.log('localDirectory: ', localDirectory);
-    console.log(fs.existsSync(localDirectory));
-
-    console.log('sshLink ', sshLink);
-
-    console.log('pathToSSHPrivateKey: ', pathToSSHPrivateKey);
-    console.log(fs.existsSync(pathToSSHPrivateKey));
-
     return new Promise((resolve, reject) => {
       const remoteFullPath = sshLink + ':' + remoteDirectory;
       const childProcess = spawn(
@@ -30,7 +22,7 @@ export class SshProvider extends ChildProcessCommandProvider {
         [
           '-i',
           pathToSSHPrivateKey,
-          "-o 'StrictHostKeyChecking=no'",
+          '-o StrictHostKeyChecking=no',
           '-r',
           localDirectory,
           remoteFullPath,
@@ -79,16 +71,11 @@ export class SshProvider extends ChildProcessCommandProvider {
       const childProcess = spawn(
         'ssh',
         [
-          "-o 'StrictHostKeyChecking=no'",
           '-T',
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'eval $(ssh-agent -s);' +
-            `cd /root/${nameRemoteRepository};` +
-            'chmod 600 id_rsa;' +
-            'ssh-add id_rsa;' +
-            `git clone -b refactor ${gitProjectLink};`,
+          `sudo ~/${nameRemoteRepository}/pull-mini-back.script.sh ${gitProjectLink} ${nameRemoteRepository}`,
         ],
         {
           shell: true,
@@ -111,9 +98,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          `cd ~/${nameRemoteRepository}/mini_back;` +
-            'ls;' +
-            'docker compose up --build -d;',
+          `sudo ~/${nameRemoteRepository}/run-mini-back.script.sh ${nameRemoteRepository}`,
         ],
         {
           shell: true,

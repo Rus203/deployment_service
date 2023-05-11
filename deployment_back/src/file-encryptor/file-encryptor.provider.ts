@@ -9,10 +9,10 @@ import {
   access,
   rmSync,
   existsSync,
-  // chmod,
+  chmodSync,
 } from 'fs';
 
-import { readdir, chmod } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { pipeline } from 'node:stream';
@@ -20,15 +20,12 @@ import { pipeline } from 'node:stream';
 @Injectable()
 export class FileEncryptorProvider implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
-    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-key');
+    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-configs');
     const miniBackPrivateKey = path.join(commonFolder, 'id_rsa');
 
-    await chmod(miniBackPrivateKey, 0o600);
-    // if (existsSync(miniBackPrivateKey)) {
-    //   await chmod(miniBackPrivateKey, 600);
-    //   await this.encryptFilesOnPlace([miniBackPrivateKey]);
-    //   await this.removeUnencryptedFiles(commonFolder);
-    // }
+    if (existsSync(miniBackPrivateKey)) {
+      await this.encryptFilesOnPlace([miniBackPrivateKey]);
+    }
   }
 
   private encypt(
@@ -106,7 +103,10 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
         const readStream = createReadStream(path);
         const writesStream = createWriteStream(path.replace(/.enc$/, ''));
         return this.decrypt(readStream, writesStream)
-          .then(() => resolve(true))
+          .then(() => {
+            chmodSync(path.replace(/.enc$/, ''), 0o600);
+            resolve(true);
+          })
           .catch(() => reject(false));
       } else {
         Promise.allSettled(
@@ -115,7 +115,9 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
             const writesStream = createWriteStream(
               pathItem.replace(/.enc$/, ''),
             );
-            return this.decrypt(readStream, writesStream);
+            return this.decrypt(readStream, writesStream).then(() => {
+              chmodSync(pathItem.replace(/.enc$/, ''), 0o600);
+            });
           }),
         )
           .then(() => {

@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  OnApplicationBootstrap,
 } from '@nestjs/common';
 import path from 'path';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
@@ -14,15 +15,28 @@ import { Repository } from 'typeorm';
 import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { ProjectState, normalizeProjectName } from 'src/utils';
+import { chmodSync } from 'fs';
 
 @Injectable()
-export class MiniBackService {
+export class MiniBackService implements OnApplicationBootstrap {
+  rootDirectory = path.join(__dirname, '..', '..');
   constructor(
     private sshProvider: SshProvider,
     private fileEncryptorProvider: FileEncryptorProvider,
     @InjectRepository(MiniBack)
     private miniBackRepository: Repository<MiniBack>,
   ) {}
+
+  async onApplicationBootstrap() {
+    const commonPath = path.join(this.rootDirectory, 'mini-back-configs');
+    const files = await fs.readdir(commonPath);
+
+    files.forEach((file) => {
+      if (file.endsWith('.sh')) {
+        chmodSync(path.join(commonPath, file), 0o601);
+      }
+    });
+  }
 
   async getAll(userId: string) {
     return await this.miniBackRepository.find({ where: { userId } });
@@ -42,19 +56,16 @@ export class MiniBackService {
     const candidate = await this.getOne({ userId: dto.userId, serverUrl });
 
     if (candidate !== null) {
-      console.log(candidate);
       throw new BadRequestException('This server is already busy');
     }
 
-    await fs.chmod(dto.sshServerPrivateKeyPath, 0o600);
-
     dto.port = Number(process.env.MINI_BACK_PORT);
     dto.name = normalizeProjectName(dto.name);
-    // await this.fileEncryptorProvider.encryptFilesOnPlace([
-    //   dto.sshServerPrivateKeyPath,
-    // ]);
+    await this.fileEncryptorProvider.encryptFilesOnPlace([
+      dto.sshServerPrivateKeyPath,
+    ]);
 
-    // dto.sshServerPrivateKeyPath = dto.sshServerPrivateKeyPath + '.enc';
+    dto.sshServerPrivateKeyPath = dto.sshServerPrivateKeyPath + '.enc';
     const instance = this.miniBackRepository.create({ ...dto, serverUrl });
     const nameRemoteRepository = process.env.REMOTE_REPOSITORY;
     return this.miniBackRepository.save({ ...instance, nameRemoteRepository });
@@ -92,40 +103,31 @@ export class MiniBackService {
         'This instance of mini_back has already places',
       );
     }
+
     // eslint-disable-next-line prefer-const
     let { sshConnectionString, sshServerPrivateKeyPath, nameRemoteRepository } =
       currentMiniBack;
     const gitProjectLink = process.env.GIT_MINI_BACK_LINK;
-    const rootDirectory = path.join(__dirname, '..', '..');
-
-    // let miniBackPrivateKey = path.join(
-    //   rootDirectory,
-    //   'mini-back-key',
-    //   'id_rsa.enc',
-    // );
 
     let miniBackPrivateKey = path.join(
-      rootDirectory,
-      'mini-back-key',
-      'id_rsa',
+      this.rootDirectory,
+      'mini-back-configs',
+      'id_rsa.enc',
     );
 
     if (!fs.access(miniBackPrivateKey)) {
       throw new InternalServerErrorException(
-        "Secret key of mini back wasn't provide",
+        "Secret key of mini back wasn't provided",
       );
     }
 
-    // await this.fileEncryptorProvider.decryptFilesOnPlace([
-    //   miniBackPrivateKey,
-    //   sshServerPrivateKeyPath,
-    // ]);
+    await this.fileEncryptorProvider.decryptFilesOnPlace([
+      miniBackPrivateKey,
+      sshServerPrivateKeyPath,
+    ]);
 
-    // miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
-    // sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
-
-    await fs.chmod(miniBackPrivateKey, 0o600);
-    await fs.chmod(sshServerPrivateKeyPath, 0o600);
+    miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
+    sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
 
     try {
       // place the private key of mini back
@@ -134,7 +136,7 @@ export class MiniBackService {
       //     sshLink: sshConnectionString,
       //     pathToSSHPrivateKey: sshServerPrivateKeyPath,
       //   },
-      //   path.join(rootDirectory, 'mini-back-key'),
+      //   path.join(this.rootDirectory, 'mini-back-configs'),
       //   nameRemoteRepository,
       // );
 
@@ -160,11 +162,11 @@ export class MiniBackService {
     } catch (error: any) {
       throw new BadRequestException(error);
     } finally {
-      // await this.fileEncryptorProvider.encryptFilesOnPlace(
-      //   [miniBackPrivateKey, sshServerPrivateKeyPath].map((path) =>
-      //     path.replace(/.enc$/, ''),
-      //   ),
-      // );
+      await this.fileEncryptorProvider.encryptFilesOnPlace(
+        [miniBackPrivateKey, sshServerPrivateKeyPath].map((path) =>
+          path.replace(/.enc$/, ''),
+        ),
+      );
     }
 
     return 'success';
