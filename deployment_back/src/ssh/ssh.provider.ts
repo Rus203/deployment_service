@@ -75,7 +75,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          `sudo ~/${nameRemoteRepository}/pull-mini-back.script.sh ${gitProjectLink} ${nameRemoteRepository}`,
+          `"sudo ~/${nameRemoteRepository}/pull-mini-back.script.sh ${gitProjectLink} ${nameRemoteRepository}"`,
         ],
         {
           shell: true,
@@ -98,7 +98,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          `sudo ~/${nameRemoteRepository}/run-mini-back.script.sh ${nameRemoteRepository}`,
+          `"sudo ~/${nameRemoteRepository}/run-mini-back.script.sh ${nameRemoteRepository}"`,
         ],
         {
           shell: true,
@@ -121,10 +121,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          `cd ${nameRemoteRepository}/mini_back;` +
-            'docker rm -f $(docker ps -aq);' +
-            'docker rmi -f $(docker images -aq);' +
-            `rm -r ~/${nameRemoteRepository};`,
+          `"sudo ~/${nameRemoteRepository}/delete-mini-back.script.sh ${nameRemoteRepository}"`,
         ],
         {
           shell: true,

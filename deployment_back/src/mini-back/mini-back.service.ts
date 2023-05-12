@@ -78,7 +78,9 @@ export class MiniBackService implements OnApplicationBootstrap {
     }
 
     try {
-      await this.deleteMiniBackFromServer(currentMiniBack);
+      if (currentMiniBack.deployState !== ProjectState.UNDEPLOYED) {
+        await this.deleteMiniBackFromServer(currentMiniBack);
+      }
     } catch (error) {
       throw new BadRequestException(error);
     } finally {
@@ -100,7 +102,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     const deployState = currentMiniBack.deployState;
     if (deployState === ProjectState.DEPLOYED) {
       throw new BadRequestException(
-        'This instance of mini_back has already places',
+        'This instance of mini_back has already either developed or failed via you are not able to do it',
       );
     }
 
@@ -131,14 +133,14 @@ export class MiniBackService implements OnApplicationBootstrap {
 
     try {
       // place the private key of mini back
-      // await this.sshProvider.putDirectoryToRemoteServer(
-      //   {
-      //     sshLink: sshConnectionString,
-      //     pathToSSHPrivateKey: sshServerPrivateKeyPath,
-      //   },
-      //   path.join(this.rootDirectory, 'mini-back-configs'),
-      //   nameRemoteRepository,
-      // );
+      await this.sshProvider.putDirectoryToRemoteServer(
+        {
+          sshLink: sshConnectionString,
+          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+        },
+        path.join(this.rootDirectory, 'mini-back-configs'),
+        nameRemoteRepository,
+      );
 
       // pull mini back from github repo
       await this.sshProvider.pullMiniBack(
@@ -158,8 +160,15 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
-      await this.defineAsDeployed(currentMiniBack.id, currentMiniBack.userId);
+      await this.miniBackRepository.update(
+        { id: currentMiniBack.id },
+        { deployState: ProjectState.DEPLOYED },
+      );
     } catch (error: any) {
+      await this.miniBackRepository.update(
+        { id: currentMiniBack.id },
+        { deployState: ProjectState.FAILED },
+      );
       throw new BadRequestException(error);
     } finally {
       await this.fileEncryptorProvider.encryptFilesOnPlace(
@@ -196,17 +205,5 @@ export class MiniBackService implements OnApplicationBootstrap {
         sshServerPrivateKeyPath.replace(/.enc$/, ''),
       );
     }
-  }
-
-  async defineAsDeployed(id: string, userId: string) {
-    const project = await this.getOne({ id, userId });
-    if (project === null) {
-      throw new NotFoundException('Such a mini back was not found');
-    }
-
-    await this.miniBackRepository.update(
-      { id },
-      { deployState: ProjectState.DEPLOYED },
-    );
   }
 }
