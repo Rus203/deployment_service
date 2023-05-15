@@ -84,7 +84,7 @@ const UserDropdown = () => {
         <Divider sx={{ mt: 0, mb: 1 }} />
         <Link href="/login">
           <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose('/login')}>
-            <LogoutVariant sx={{ marginRight: 2, fontSize: '1.375rem', color: 'text.secondary' }} />
+            <LogoutVariant />
             Logout
           </MenuItem>
         </Link>

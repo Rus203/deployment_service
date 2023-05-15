@@ -1,5 +1,8 @@
 export interface IStatistic {
-  freeMemory: number
-  totalMemory: number
-  cpuUsage: number
+  status: string;
+  value: {
+    rom: { totalSpace: string; usedSpace: string };
+    ram: { totalMemory: string; usedMemory: string };
+    cpuUsage: number;
+  };
 }
