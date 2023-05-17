@@ -18,32 +18,33 @@ import axios from 'axios'
 import { IStatistic } from '../../interface/statictic.interface';
 import { IMiniBack } from '../../interface/miniback.interface';
 import { getByPattern } from '../../utils/getByPattern';
+import { MiniBackState } from '../../utils/mini-back-state.enum';
 
 
 const Diagrams: FC = () => {
-  const [servers, setServers] = useState<IStatistic[]>([{
-    status: "fulfilled",
-    value: {
-      rom: { totalSpace: "0Gb", usedSpace: "0Gb" },
-      ram: { totalMemory: "0Gb", usedMemory: "0Gb" },
-      cpuUsage: 1
-    }
-
-  }])
+  const [servers, setServers] = useState<IStatistic>({
+    rom: { totalSpace: "string", usedSpace: "string" },
+    ram: { totalMemory: "string", usedMemory: "string" },
+    cpuUsage: 0
+  })
   const { data: minibacks } = useGetMinibacksQuery(undefined)
 
 
   useEffect(() => {
+    console.log(minibacks)
     if (minibacks !== undefined) {
-      Promise.allSettled(minibacks.map((item: IMiniBack): Promise<any> => {
-        const { port, serverUrl } = item
-        return axios.get(`http://${serverUrl}:${port}/server/status`).then(response => response.data);
+      Promise.allSettled(minibacks.map((item: IMiniBack) => {
+        const { port, serverUrl, name } = item
+        if (item.deployState === MiniBackState.DEPLOYED) {
+          return axios.get(`http://${serverUrl}:${port}/server/status`)
+            .then(response => {
+              console.log(response.data)
+              return response
+            })
+            .then(res => setServers(res.data));
+        }
+
       }))
-        .then((res: any) => {
-          console.log(res)
-          setServers(res)
-        })
-        .then(() => console.log(servers))
         .catch(error => { console.log(error) })
     }
   }, [minibacks])
@@ -62,7 +63,7 @@ const Diagrams: FC = () => {
 
     if (total && current) {
       const [fullSize, totalMeasure] = [getByPattern(total, /[0-9.]+/g), getByPattern(total, /[a-zA-Z]/g)]
-      const [currentSize, currentMeasure] = [getByPattern(current,/[0-9.]+/g), getByPattern(current, /[a-zA-Z]/g)]
+      const [currentSize, currentMeasure] = [getByPattern(current, /[0-9.]+/g), getByPattern(current, /[a-zA-Z]/g)]
       return (translate(currentSize, currentMeasure) / translate(fullSize, totalMeasure)) * 100
     }
     return 0
@@ -70,48 +71,48 @@ const Diagrams: FC = () => {
 
   return (
     <Wrapper>
-      {servers.map((server, i) =>
-        <Instance key={i}>
-          <SectionName>{i+1}</SectionName>
-          <Section>
-            <DiagramsContainer>
-              <Item>
-                <Title>Ram</Title>
-                <CircularProgressbar
-                  minValue={0}
-                  maxValue={100}
-                  styles={{ path: { stroke: '#ffb800' }, text: { fill: '#3a3541de' } }}
-                  value={converterToGb(server.value.ram?.totalMemory, server.value.ram?.usedMemory)}
-                  text={server.value.ram?.usedMemory}
-                />
-              </Item>
-              <Item>
-                <Title>Rom</Title>
-                <CircularProgressbar
-                  minValue={0}
-                  maxValue={100}
-                  styles={{ path: { stroke: '#2dca73' }, text: { fill: '#3a3541de' } }}
-                  value={converterToGb(server.value.rom?.totalSpace, server.value.rom?.usedSpace)} 
-                  text={server.value.rom?.usedSpace} 
-                />
-              </Item>
-              <Item>
-                <Title>CPU usage</Title>
-                <CircularProgressbar
-                  minValue={0}
-                  maxValue={100}
-                  styles={{ text: { fill: '#3a3541de' } }}
-                  value={Math.floor(server.value.cpuUsage * 100) ?? 0} 
-                  text={`${Math.floor(server.value.cpuUsage * 100)}%` ?? "0"} 
-                />
-              </Item>
-            </DiagramsContainer>
-            <TableContainer>
-              <InfoTable statistic={server} />
-            </TableContainer>
-          </Section>
-        </Instance>
-      )}
+
+      <Instance>
+        <SectionName>1</SectionName>
+        <Section>
+          <DiagramsContainer>
+            <Item>
+              <Title>Ram</Title>
+              <CircularProgressbar
+                minValue={0}
+                maxValue={100}
+                styles={{ path: { stroke: '#ffb800' }, text: { fill: '#3a3541de' } }}
+                value={converterToGb(servers.ram?.totalMemory, servers.ram?.usedMemory)}
+                text={servers.ram?.usedMemory}
+              />
+            </Item>
+            <Item>
+              <Title>Rom</Title>
+              <CircularProgressbar
+                minValue={0}
+                maxValue={100}
+                styles={{ path: { stroke: '#2dca73' }, text: { fill: '#3a3541de' } }}
+                value={converterToGb(servers.rom?.totalSpace, servers.rom?.usedSpace)}
+                text={servers.rom?.usedSpace}
+              />
+            </Item>
+            <Item>
+              <Title>CPU usage</Title>
+              <CircularProgressbar
+                minValue={0}
+                maxValue={100}
+                styles={{ text: { fill: '#3a3541de' } }}
+                value={Math.floor(servers.cpuUsage * 100) ?? 0}
+                text={`${Math.floor(servers.cpuUsage * 100)}%` ?? "0"}
+              />
+            </Item>
+          </DiagramsContainer>
+          <TableContainer>
+            <InfoTable statistic={servers} />
+          </TableContainer>
+        </Section>
+      </Instance>
+
 
     </Wrapper>)
 

@@ -1,3 +1,5 @@
 export const getByPattern = (value: string, pattern: any) => {
-  return value.match(pattern)!.join("");
+  const matches = value.match(pattern);
+  const result = matches ? matches.join("") : "";
+  return result;
 };

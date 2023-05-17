@@ -18,8 +18,8 @@ const DashBoardMiniBackTable: FC = () => {
   const navigate = useNavigate()
   const { data = [] } = useGetMinibacksQuery(undefined)
 
-  const [ deleteMiniBack , { isLoading: isLoadingDelete }] = useDeleteMinibackMutation()
-  const [ deployMiniBack, { isLoading: isLoadingDeploy }] = useDeployMinibackMutation()
+  const [deleteMiniBack, { isLoading: isLoadingDelete }] = useDeleteMinibackMutation()
+  const [deployMiniBack, { isLoading: isLoadingDeploy }] = useDeployMinibackMutation()
 
   const followToProjects = (miniBackId: string) => {
     const miniBackItem = data.find(item => item.id === miniBackId)
@@ -31,62 +31,62 @@ const DashBoardMiniBackTable: FC = () => {
   return (
     <Container>
       <Card>
-      <TableContainer>
-        <FixedTable>
-        <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
-          <TableHead>
-            <TableRow>
-              <TableCell>№</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Server url</TableCell>
-              <TableCell>Port</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell colSpan={4} align='center'>Controls</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {
-              isLoadingDelete || isLoadingDeploy
-                ? <Spinner typeOfMessages={null}  />
-                : (
-                data.map((row: IMiniBack, index) => (
-                <TableRow
-                  hover
-                  key={row.id}
-                  onClick={() => followToProjects(row.id)}
-                  sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
-                >
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.serverUrl}</TableCell>
-                  <TableCell>{row.port}</TableCell>
-                  <TableCell>{row.deployState}</TableCell>
-                  <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-                    <Button
-                      variant='outlined'
-                      onClick={() => deployMiniBack(row.id)}
-                      disabled={row.deployState === MiniBackState.DEPLOYED
-                        || row.deployState === MiniBackState.FAILED}
-                      >
-                        Deploy
-                      </Button>
-                    <Button
-                      onClick={() => deleteMiniBack(row.id)}
-                      variant='outlined'
-                      color='error'
-                      >
-                        Delete
-                      </Button>
-                  </TableCell>
+        <TableContainer>
+          <FixedTable>
+            <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
+              <TableHead>
+                <TableRow>
+                  <TableCell>№</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Server url</TableCell>
+                  <TableCell>Port</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell colSpan={4} align='center'>Controls</TableCell>
                 </TableRow>
-              )
-            ))}
-          </TableBody>
-        </Table>
-        </FixedTable>
-      </TableContainer>
+              </TableHead>
+              <TableBody>
+                {
+                  isLoadingDelete || isLoadingDeploy
+                    ? <tr><td colSpan={6}><Spinner typeOfMessages={null} /></td></tr>
+                    : (
+                      data.map((row: IMiniBack, index) => (
+                        <TableRow
+                          hover
+                          key={row.id}
+                          onClick={() => followToProjects(row.id)}
+                          sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
+                        >
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell>{row.name}</TableCell>
+                          <TableCell>{row.serverUrl}</TableCell>
+                          <TableCell>{row.port}</TableCell>
+                          <TableCell>{row.deployState}</TableCell>
+                          <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
+                            <Button
+                              variant='outlined'
+                              onClick={() => deployMiniBack(row.id)}
+                              disabled={row.deployState === MiniBackState.DEPLOYED
+                                || row.deployState === MiniBackState.FAILED}
+                            >
+                              Deploy
+                            </Button>
+                            <Button
+                              onClick={() => deleteMiniBack(row.id)}
+                              variant='outlined'
+                              color='error'
+                            >
+                              Delete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                      ))}
+              </TableBody>
+            </Table>
+          </FixedTable>
+        </TableContainer>
       </Card>
-      
+
       <LinkToDeploy href='/mini-back'>
         <Button variant="contained">Create</Button>
       </LinkToDeploy>

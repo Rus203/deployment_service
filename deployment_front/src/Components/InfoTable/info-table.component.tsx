@@ -33,9 +33,9 @@ const InfoTable: FC<Props> = ({ statistic }) => {
 
 
   const rows = [
-    createData('RAM', converterToGB(statistic.value.ram?.usedMemory), +statistic.value.ram?.totalMemory.slice(0, -2), " GB"),
-    createData('ROM', converterToGB(statistic.value.rom?.usedSpace), converterToGB(statistic.value.rom?.totalSpace), " GB"),
-    createData('CPU', Math.floor(statistic.value.cpuUsage * 100), 100, "%"),
+    createData('RAM', converterToGB(statistic.ram?.usedMemory), +statistic.ram?.totalMemory.slice(0, -2), " GB"),
+    createData('ROM', converterToGB(statistic.rom?.usedSpace), converterToGB(statistic.rom?.totalSpace), " GB"),
+    createData('CPU', Math.floor(statistic.cpuUsage * 100), 100, "%"),
   ];
 
 

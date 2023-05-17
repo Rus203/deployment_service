@@ -19,7 +19,7 @@ import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 
 import Link from '../../../../Components/Link/LInk'
 import { logOut } from '../../../../store/features'
-import { useAppDispatch } from '../../../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -32,13 +32,24 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 
 const UserDropdown = () => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+  const { name, email } = useAppSelector(state => state.auth)
   const dispatch = useAppDispatch()
+
+  const capitalizeFirstLowercaseRest = (str: string) => {
+    return (
+      str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+    );
+  };
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)
   }
 
   const handleDropdownClose = (url?: string) => {
+    setAnchorEl(null)
+  }
+
+  const handleLogout = (url?: string) => {
     setAnchorEl(null)
     dispatch(logOut());
   }
@@ -53,7 +64,7 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Avatar
-          alt='John Doe'
+          alt={name}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
           src='/images/avatars/1.png'
@@ -74,16 +85,19 @@ const UserDropdown = () => {
               badgeContent={<BadgeContentSpan />}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-              <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar alt={name} src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{capitalizeFirstLowercaseRest(name)}</Typography>
+              <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
+                {capitalizeFirstLowercaseRest(email)}
+              </Typography>
             </Box>
           </Box>
         </Box>
         <Divider sx={{ mt: 0, mb: 1 }} />
         <Link href="/login">
-          <MenuItem sx={{ py: 2 }} onClick={() => handleDropdownClose('/login')}>
+          <MenuItem sx={{ py: 2 }} onClick={() => handleLogout('/login')}>
             <LogoutVariant />
             Logout
           </MenuItem>

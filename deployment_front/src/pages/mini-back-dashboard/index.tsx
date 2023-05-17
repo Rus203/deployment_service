@@ -1,5 +1,5 @@
 import React from 'react'
-import MiniBackDashboard from './project-dashboard.component'
+import MiniBackDashboard from './mini-back-dashboard.component'
 
 const Component: React.FC = () => {
   return <MiniBackDashboard />

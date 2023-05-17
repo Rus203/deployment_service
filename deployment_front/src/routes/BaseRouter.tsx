@@ -7,7 +7,7 @@ import Login from "../pages/Login";
 import UserLayout from "../layouts/UserLayout";
 import Project from "../pages/Project";
 import Diagrams from "../pages/Diagrams";
-import DashboardMiniBack from "../pages/mini-back-dashboard/project-dashboard.component";
+import DashboardMiniBack from "../pages/mini-back-dashboard/mini-back-dashboard.component";
 import MiniBack from '../pages/Mini-Back';
 import ProtectedComponent from "../Components/Protected-Component";
 
