@@ -20,6 +20,7 @@ import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 import Link from '../../../../Components/Link/LInk'
 import { logOut } from '../../../../store/features'
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
+import { capitalizeFirstLowercaseRest } from '../../../../utils/upper-first-letter'
 
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
@@ -35,11 +36,7 @@ const UserDropdown = () => {
   const { name, email } = useAppSelector(state => state.auth)
   const dispatch = useAppDispatch()
 
-  const capitalizeFirstLowercaseRest = (str: string) => {
-    return (
-      str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-    );
-  };
+
 
   const handleDropdownOpen = (event: SyntheticEvent) => {
     setAnchorEl(event.currentTarget)

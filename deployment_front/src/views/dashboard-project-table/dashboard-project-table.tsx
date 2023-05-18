@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Button } from '@mui/material'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -14,62 +14,87 @@ import { Container, LinkToDeploy, FixedTable, ControlButtons } from './table.sty
 import { useGetMinibackQuery, useGetProjectsQuery, useDeleteProjectMutation } from '../../services'
 import { ProjectState } from '../../utils/project-state.enum'
 import Spinner from '../../Components/Spinner'
+import { IProject } from '../../interface/project.interface'
+import axios from 'axios'
 
 const DashBoardProjectTable: FC = () => {
   const location = useLocation()
   const miniBackId = location.pathname.split('/')[2]
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const { data: miniback } = useGetMinibackQuery(miniBackId)
   const { data: projects } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
-  const [ deleteProject ] = useDeleteProjectMutation()
+
+  const handleDeploy = (project: IProject) => {
+    const { id } = project
+    setIsLoading(true)
+    axios.post(`http://${miniback?.serverUrl}:${miniback?.port}/project/${id}/run`)
+      .catch(e => console.log(e))
+      .finally(() => setIsLoading(false))
+  }
+
+  const handleDelete = (project: IProject) => {
+    const { id } = project
+    setIsLoading(true)
+    axios.delete(`http://${miniback?.serverUrl}:${miniback?.port}/project/${id}/delete`)
+      .catch(e => console.log(e))
+      .finally(() => setIsLoading(false))
+  }
 
   return (
     <Container>
       <Card>
         <TableContainer>
           <FixedTable>
-          <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
-            <TableHead>
-              <TableRow>
-                <TableCell>№</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Git link</TableCell>
-                <TableCell>Port</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell colSpan={4} align='center'>Controls</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              { projects !== undefined && projects.map((row, index) => (
-                <TableRow
-                  hover
-                  key={index}
-                  sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
-                >
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                      <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.name}</Typography>
-                      <Typography variant='caption'>{row.email}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{row.gitLink}</TableCell>
-                  <TableCell>{row.port}</TableCell>
-                  <TableCell>{row.state}</TableCell>
-                  <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-                    <Button variant='outlined' disabled={row.state !== ProjectState.UNDEPLOYED}>Deploy</Button>
-                    <Button
-                      onClick={() => deleteProject({
-                        serverUrl: miniback?.serverUrl, port: miniback?.port, id: row.id
-                      })}
-                      variant='outlined'
-                      color='error'
-                      >
-                        Delete</Button>
-                  </TableCell>
+            <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
+              <TableHead>
+                <TableRow>
+                  <TableCell>№</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Git link</TableCell>
+                  <TableCell>Port</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell colSpan={4} align='center'>Controls</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {isLoading ?
+                  <tr><td colSpan={6}><Spinner typeOfMessages={null} /></td></tr>
+                  :
+                  (projects !== undefined && projects.map((row, index) => (
+                    <TableRow
+                      hover
+                      key={index}
+                      sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
+                    >
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{row.name}</Typography>
+                          <Typography variant='caption'>{row.email}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{row.gitLink}</TableCell>
+                      <TableCell>{row.port}</TableCell>
+                      <TableCell>{row.state}</TableCell>
+                      <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
+                        <Button
+                          variant='outlined'
+                          disabled={row.state !== ProjectState.UNDEPLOYED}
+                          onClick={() => handleDeploy(row)}
+                        >Deploy</Button>
+                        <Button
+                          onClick={() => handleDelete(row)}
+                          variant='outlined'
+                          color='error'
+                        >
+                          Delete</Button>
+                      </TableCell>
+                    </TableRow>
+                  )))
+                }
+
+              </TableBody>
+            </Table>
           </FixedTable>
         </TableContainer>
       </Card>
