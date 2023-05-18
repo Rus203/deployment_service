@@ -1,25 +1,27 @@
-import { FC } from 'react'
 import {
   Button,
   TextField,
 } from "@mui/material";
-import {
-  Container,
-  FormContainer,
-  ProjectOptionsContainer,
-  SelectProjectsContainer,
-  FormControl,
-  SectionHeader,
-  Section,
-  SectionInputs,
-  ButtonsContainer,
-  FormHelperText,
-  FileInput,
-} from "./project.styles";
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form';
-import { useCreateProjectMutation, useGetMinibackQuery, useGetProjectsQuery } from '../../services';
 import axios from 'axios';
+import { FC } from 'react';
+import { useForm } from 'react-hook-form';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useGetMinibackQuery, useCreateProjectMutation } from '../../services';
+import {
+  ButtonsContainer,
+  Container,
+  FileInput,
+  FormContainer,
+  FormControl,
+  FormHelperText,
+  ProjectOptionsContainer,
+  Section,
+  SectionHeader,
+  SectionInputs,
+  SelectProjectsContainer,
+} from "./project.styles";
+import { useAppSelector } from "../../store/hooks";
+import { ConsoleNetwork } from "mdi-material-ui";
 
 interface IProject {
   name: string,
@@ -34,13 +36,12 @@ export const Project: FC = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IProject>({
     mode: 'onChange'
   });
-
+  const { email } = useAppSelector(state => state.auth)
   const navigate = useNavigate()
   const location = useLocation()
   const miniBackId = location.pathname.split('/')[2]
-  const { data: miniback } = useGetMinibackQuery(miniBackId)
-  // const [addProject] = useCreateProjectMutation()
-  // const { data: projects } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
+  const { data: miniback } = useGetMinibackQuery({ id: miniBackId })
+  const [createProject] = useCreateProjectMutation()
 
   const envFile = watch('envFile');
   const sshGitPrivateKey = watch('sshGitPrivateKey')
@@ -53,11 +54,11 @@ export const Project: FC = () => {
     formData.append('gitLink', data.gitLink)
     formData.append('envFile', data.envFile[0])
     formData.append('sshGitPrivateKey', data.sshGitPrivateKey[0])
-    axios.post(`http://${miniback?.serverUrl}:${miniback?.port}/project`, formData)
+    createProject({
+      body: formData, serverUrl: miniback?.serverUrl, port: miniback?.port
+    })
       .catch(e => console.log(e))
-      .finally(() => navigate(`/mini-back/${miniBackId}}`))
-
-    // addProject({ serverUrl: miniback?.serverUrl, port: miniback?.port, body: formData })
+      .finally(() => navigate(`/mini-back/${miniBackId}`))
   }
 
   const comeBack = (): void => {
@@ -93,10 +94,10 @@ export const Project: FC = () => {
                   size="small"
                   type="email"
                   error={!!errors.email}
-                  required
-                  focused
+                  defaultValue={email}
+                  inputProps={{ readOnly: true }}
                   {...register("email", {
-                    required: 'Email is required',
+                    // required: 'Email is required',
                     maxLength: 63,
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -144,17 +145,13 @@ export const Project: FC = () => {
                     })}
                   />
                 </Button>
+                {!errors.sshGitPrivateKey?.message && sshGitPrivateKey &&
+                  !!sshGitPrivateKey.length && (
+                    <FormHelperText>
+                      File: {sshGitPrivateKey[0].name}
+                    </FormHelperText>
+                  )}
                 {errors.sshGitPrivateKey && <FormHelperText>
-                  {errors.sshGitPrivateKey.message}
-                </FormHelperText>
-                }
-                {errors.sshGitPrivateKey && <FormHelperText>
-                  {!errors.sshGitPrivateKey?.message && sshGitPrivateKey &&
-                    !!sshGitPrivateKey.length && (
-                      <FormHelperText>
-                        File: {sshGitPrivateKey[0].name}
-                      </FormHelperText>
-                    )}
                   {errors.sshGitPrivateKey.message}
                 </FormHelperText>
                 }

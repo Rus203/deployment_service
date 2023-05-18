@@ -3,8 +3,6 @@ import {
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
 import { IProject } from "../interface/project.interface";
-import { LargeNumberLike } from "crypto";
-import { IStatistic } from "../interface/statictic.interface";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: '',
@@ -36,7 +34,7 @@ export const projectsApi = createApi({
 
     createProject: build.mutation<IProject, { serverUrl?: string, port?: number, body: FormData}>({
       query: ({ body, port, serverUrl }) => serverUrl && port ? ({
-        url: `http://${serverUrl}:${port}/project/`,
+        url: `http://${serverUrl}:${port}/project`,
         method: "POST",
         body,
       }) : '',
@@ -55,12 +53,12 @@ export const projectsApi = createApi({
     }),
 
     deleteProject: build.mutation<boolean, { serverUrl?: string, port?: number, id: string}>({
-      query: ({ serverUrl, port, id}) => serverUrl && port ? ({ url: `http://${serverUrl}:${port}/project/${id}/delete`, method: "POST" }) : '',
+      query: ({ serverUrl, port, id}) => serverUrl && port ? ({ url: `http://${serverUrl}:${port}/project/${id}/delete`, method: "DELETE" }) : '',
       invalidatesTags: ["Project"],
     }),
 
-    deployProject: build.mutation<boolean, string>({
-      query: (id) => ({ url: `project/${id}/deploy`, method: "POST" }),
+    deployProject: build.mutation<boolean,  { serverUrl?: string, port?: number, id: string}>({
+      query: ({serverUrl, port, id}) => ({ url: `http://${serverUrl}:${port}/project/${id}/run`, method: "POST" }),
     }),
   }),
 });

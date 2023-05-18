@@ -86,8 +86,10 @@ export const minibacksApi = createApi({
           : ["Miniback"],
     }),
 
-    getMiniback: build.query<IMiniBack, string>({
-      query: (id) => `mini-back/${id}`,
+    getMiniback: build.query<IMiniBack, { id?: string }>({
+      query: ({ id }) => {
+        return `mini-back/${id}`;
+      },
       providesTags: (result) =>
         result ? [{ type: "Miniback" as const, id: result.id }] : ["Miniback"],
     }),

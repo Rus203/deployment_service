@@ -1,4 +1,3 @@
-import { FC, useState } from 'react'
 import { Button } from '@mui/material'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -9,25 +8,37 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
+import { FC, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Container, LinkToDeploy, FixedTable, ControlButtons } from './table.styles'
-import { useGetMinibackQuery, useGetProjectsQuery, useDeleteProjectMutation } from '../../services'
-import { ProjectState } from '../../utils/project-state.enum'
 import Spinner from '../../Components/Spinner'
 import { IProject } from '../../interface/project.interface'
-import axios from 'axios'
+import { useDeleteProjectMutation, useDeployProjectMutation, useGetMinibackQuery, useGetProjectsQuery } from '../../services'
+import { ProjectState } from '../../utils/project-state.enum'
+import { Container, ControlButtons, FixedTable, LinkToDeploy } from './table.styles'
 
 const DashBoardProjectTable: FC = () => {
   const location = useLocation()
   const miniBackId = location.pathname.split('/')[2]
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { data: miniback } = useGetMinibackQuery(miniBackId)
-  const { data: projects } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
+  const { data: miniback } = useGetMinibackQuery({ id: miniBackId })
+  const { data: projects, isFetching } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
+  const [deleteProject, { isLoading: isLoadingDelete }] = useDeleteProjectMutation();
+  const [deployProject, { isLoading: isLoadingDeploy }] = useDeployProjectMutation();
+
+  // const handleDeploy = (project: IProject) => {
+  //   const { id } = project
+  //   setIsLoading(true)
+  //   axios.post(`http://${miniback?.serverUrl}:${miniback?.port}/project/${id}/run`)
+  //     .catch(e => console.log(e))
+  //     .finally(() => setIsLoading(false))
+  // }
 
   const handleDeploy = (project: IProject) => {
     const { id } = project
     setIsLoading(true)
-    axios.post(`http://${miniback?.serverUrl}:${miniback?.port}/project/${id}/run`)
+    deployProject({
+      serverUrl: miniback?.serverUrl, port: miniback?.port, id
+    })
       .catch(e => console.log(e))
       .finally(() => setIsLoading(false))
   }
@@ -35,7 +46,9 @@ const DashBoardProjectTable: FC = () => {
   const handleDelete = (project: IProject) => {
     const { id } = project
     setIsLoading(true)
-    axios.delete(`http://${miniback?.serverUrl}:${miniback?.port}/project/${id}/delete`)
+    deleteProject({
+      serverUrl: miniback?.serverUrl, port: miniback?.port, id
+    })
       .catch(e => console.log(e))
       .finally(() => setIsLoading(false))
   }
@@ -57,7 +70,7 @@ const DashBoardProjectTable: FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {isLoading ?
+                {isFetching || isLoading ?
                   <tr><td colSpan={6}><Spinner typeOfMessages={null} /></td></tr>
                   :
                   (projects !== undefined && projects.map((row, index) => (

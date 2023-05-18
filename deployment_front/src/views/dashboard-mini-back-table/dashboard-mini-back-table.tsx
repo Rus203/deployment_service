@@ -28,6 +28,12 @@ const DashBoardMiniBackTable: FC = () => {
     }
   }
 
+  const handleDelete: any = (event: any,minibackId: any) => {
+    event.stopPropagation();
+    deleteMiniBack(minibackId)
+      .catch(e => console.log(e))
+  }
+
   return (
     <Container>
       <Card>
@@ -71,7 +77,7 @@ const DashBoardMiniBackTable: FC = () => {
                               Deploy
                             </Button>
                             <Button
-                              onClick={() => deleteMiniBack(row.id)}
+                              onClick={(e) => handleDelete(e, row.id)}
                               variant='outlined'
                               color='error'
                             >
