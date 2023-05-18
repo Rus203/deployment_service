@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, MouseEvent, useState } from "react";
+import { ChangeEvent, FC, MouseEvent, useState, useEffect } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -18,8 +18,8 @@ import EyeOutline from "mdi-material-ui/EyeOutline";
 import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1";
 
 import { SubmitHandler, useForm } from "react-hook-form";
-import { BoxStyled } from "./register.styles";
-import { FormHelperText } from "@mui/material";
+import { BoxStyled, StyledAlertContainer } from "./register.styles";
+import { FormHelperText, Alert } from "@mui/material";
 import Link from "../../Components/Link/LInk";
 import { useNavigate } from "react-router-dom";
 import { useRegisterUserMutation } from "../../services";
@@ -40,8 +40,11 @@ type Inputs = {
 };
 
 const Register: FC = () => {
+  const [isShowAlert, setShowAlert] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [registerUser, { isLoading }] = useRegisterUserMutation();
+  const [registerUser] = useRegisterUserMutation();
+
 
   const [values, setValues] = useState<State>({
     password: "",
@@ -57,8 +60,10 @@ const Register: FC = () => {
       console.log('data: ', data)
       await registerUser(data).unwrap();
       navigate("/");
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.log(error);
+      setShowAlert(true);
+      setErrorMessage(error.data.message);
     }
   };
 
@@ -73,7 +78,15 @@ const Register: FC = () => {
     event.preventDefault();
   };
 
+  useEffect(() => {
+    if (isShowAlert) {
+      const timerId = setTimeout(() => setShowAlert(false), 3000);
+      return () => clearTimeout(timerId);
+    }
+  }, [isShowAlert])
+
   return (
+    <>
     <BoxStyled>
       <Card sx={{ zIndex: 1 }}>
         <CardContent
@@ -206,6 +219,13 @@ const Register: FC = () => {
       </Card>
       <FooterIllustrationsV1 />
     </BoxStyled>
+    {(errorMessage !== null && isShowAlert)
+      ? <StyledAlertContainer>
+          <Alert severity="error">{errorMessage}</Alert>
+        </StyledAlertContainer>
+      : null
+      }
+    </>
   );
 };
 

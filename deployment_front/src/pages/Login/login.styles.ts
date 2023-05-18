@@ -8,7 +8,7 @@ export const BoxStyled = styled(Box)`
   justify-content: center;
 `;
 
-export const StyledAlert = styled(Box)`
+export const StyledAlertContainer = styled(Box)`
   position: absolute;
   top: 1.5%;
   left: 0;

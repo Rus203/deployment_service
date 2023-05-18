@@ -23,7 +23,7 @@ import { useLoginUserMutation } from "../../services";
 import { setCredentials } from "../../store/features";
 import { useAppDispatch } from "../../store/hooks";
 import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1";
-import { BoxStyled, StyledAlert } from "./login.styles";
+import { BoxStyled, StyledAlertContainer } from "./login.styles";
 
 interface State {
   password: string;
@@ -42,8 +42,8 @@ const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
 
 const Login: FC = () => {
   const dispatch = useAppDispatch();
-  const [isShowAlert, setShowAlert] = useState<boolean>(false);
   const [login] = useLoginUserMutation();
+  const [isShowAlert, setShowAlert] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const [values, setValues] = useState<State>({
@@ -56,7 +56,6 @@ const Login: FC = () => {
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data)
     try {
       const answer = await login(data).unwrap()
       dispatch(setCredentials(answer));
@@ -215,9 +214,9 @@ const Login: FC = () => {
       <FooterIllustrationsV1 />
     </BoxStyled>
       {(errorMessage !== null && isShowAlert)
-      ? <StyledAlert>
+      ? <StyledAlertContainer>
           <Alert severity="error">{errorMessage}</Alert>
-        </StyledAlert>
+        </StyledAlertContainer>
       : null
       }
     </>
