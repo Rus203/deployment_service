@@ -15,6 +15,7 @@ const Diagrams: FC = () => {
 
   return (
     <Wrapper>
+      {minibacks?.filter(m => m.deployState === MiniBackState.DEPLOYED).length === 0 && <h1>No running servers</h1> }
       {minibacks !== undefined && minibacks?.filter(m => m.deployState === MiniBackState.DEPLOYED).map(miniback => (
         <DiagramItem key={miniback.id} miniback={miniback} />
       ))}

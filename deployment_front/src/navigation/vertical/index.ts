@@ -23,11 +23,11 @@ const navigation = (): any => {
     //   sectionTitle: "            ",
     // },
 
-    {
-      title: "Logout",
-      icon: Logout,
-      path: "/login",
-    },
+    // {
+    //   title: "Logout",
+    //   icon: Logout,
+    //   path: "/login",
+    // },
   ];
 };
 
