@@ -11,7 +11,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 
-import { Alert, FormHelperText } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import EyeOffOutline from "mdi-material-ui/EyeOffOutline";
 import EyeOutline from "mdi-material-ui/EyeOutline";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -22,6 +22,7 @@ import { setCredentials } from "../../store/features";
 import { useAppDispatch } from "../../store/hooks";
 import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1";
 import { BoxStyled, StyledAlertContainer } from "./login.styles";
+import Alert from "../../Components/Alert";
 
 interface State {
   password: string;
@@ -202,9 +203,8 @@ const Login: FC = () => {
         <FooterIllustrationsV1 />
       </BoxStyled>
       {(errorMessage !== null && isShowAlert)
-        ? <StyledAlertContainer>
-          <Alert severity="error">{errorMessage}</Alert>
-        </StyledAlertContainer>
+        ?
+        <Alert error={errorMessage} />
         : null
       }
     </>
