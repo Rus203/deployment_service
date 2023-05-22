@@ -59,6 +59,7 @@ export const projectsApi = createApi({
 
     deployProject: build.mutation<boolean,  { serverUrl?: string, port?: number, id: string}>({
       query: ({serverUrl, port, id}) => ({ url: `http://${serverUrl}:${port}/project/${id}/run`, method: "POST" }),
+      invalidatesTags: ["Project"],
     }),
   }),
 });

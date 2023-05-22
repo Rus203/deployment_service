@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, MouseEvent, useState, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -7,8 +7,6 @@ import CardContent from "@mui/material/CardContent";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
-import InputLabel from "@mui/material/InputLabel";
-import OutlinedInput from "@mui/material/OutlinedInput";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
@@ -57,7 +55,6 @@ const Login: FC = () => {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data)
     try {
       const answer = await login(data).unwrap()
       dispatch(setCredentials(answer));
@@ -75,7 +72,6 @@ const Login: FC = () => {
 
   useEffect(() => {
     if (isShowAlert) {
-      console.log('show alert');
       const timerId = setTimeout(() => setShowAlert(false), 3000);
       return () => clearTimeout(timerId);
     }

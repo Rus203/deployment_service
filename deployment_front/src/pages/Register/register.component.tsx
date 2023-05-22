@@ -57,7 +57,6 @@ const Register: FC = () => {
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log('data: ', data)
       await registerUser(data).unwrap();
       navigate("/");
     } catch (error: any) {

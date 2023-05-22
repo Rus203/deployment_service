@@ -22,16 +22,8 @@ const DashBoardProjectTable: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { data: miniback } = useGetMinibackQuery({ id: miniBackId })
   const { data: projects, isFetching } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
-  const [deleteProject, { isLoading: isLoadingDelete }] = useDeleteProjectMutation();
-  const [deployProject, { isLoading: isLoadingDeploy }] = useDeployProjectMutation();
-
-  // const handleDeploy = (project: IProject) => {
-  //   const { id } = project
-  //   setIsLoading(true)
-  //   axios.post(`http://${miniback?.serverUrl}:${miniback?.port}/project/${id}/run`)
-  //     .catch(e => console.log(e))
-  //     .finally(() => setIsLoading(false))
-  // }
+  const [deleteProject] = useDeleteProjectMutation();
+  const [deployProject] = useDeployProjectMutation();
 
   const handleDeploy = (project: IProject) => {
     const { id } = project
@@ -77,7 +69,7 @@ const DashBoardProjectTable: FC = () => {
                     <TableRow
                       hover
                       key={index}
-                      sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
+                      sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}
                     >
                       <TableCell>{index + 1}</TableCell>
                       <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
