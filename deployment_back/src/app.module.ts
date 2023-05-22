@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ServerModule } from './server/server.module';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { AuthModule } from './auth/auth.module';
 import { AccessTokenModule } from './access-token/access-token.module';
@@ -17,7 +16,6 @@ import { MiniBackModule } from './mini-back/mini-back.module';
     TypeOrmModule.forRoot(typeOrmConfig),
     RedisModule.forRoot(redisConfig),
     UserModule,
-    ServerModule,
     RefreshTokenModule,
     AuthModule,
     AccessTokenModule,
