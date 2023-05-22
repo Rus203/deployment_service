@@ -5,7 +5,7 @@ import { CircularProgressbar } from 'react-circular-progressbar';
 import InfoTable from '../InfoTable/info-table.component';
 import { Instance, SectionName, Section, DiagramsContainer, Item, Title, TableContainer } from './diagram-item.styles';
 import { getByPattern } from '../../utils/getByPattern';
-import axios from 'axios';
+import io from 'socket.io-client'
 import { MiniBackState } from '../../utils/mini-back-state.enum';
 import { IStatistic } from '../../interface/statictic.interface';
 import { capitalizeFirstLowercaseRest } from '../../utils/upper-first-letter';
@@ -37,17 +37,23 @@ const DiagramItem: FC<IProps> = ({ miniback }) => {
   const [servers, setServers] = useState<IStatistic>({
     rom: { totalSpace: "0Gb", usedSpace: "0Gb" },
     ram: { totalMemory: "0Gb", usedMemory: "0Gb" },
-    cpuUsage: 0
+    cpu: 0
   })
 
   useEffect(() => {
     const { port, serverUrl } = miniback
     if (miniback.deployState === MiniBackState.DEPLOYED) {
-      axios.get(`http://${serverUrl}:${port}/server/status`)
-        .then(response => {
-          console.log(response.data)
-          return response
-        }).then(res => setServers(res.data));
+      const socket = io(`http://${serverUrl}:${port}`)
+
+      const intervalId =  setInterval(() => {
+        socket.emit('message')
+      }, 1000)
+
+      socket.on('message', data => {
+        setServers(data)
+      })
+
+      return () => clearInterval(intervalId)
     }
   }, [miniback])
 
@@ -82,8 +88,8 @@ const DiagramItem: FC<IProps> = ({ miniback }) => {
               minValue={0}
               maxValue={100}
               styles={{ text: { fill: '#3a3541de' } }}
-              value={+((servers.cpuUsage * 100).toFixed(2))}
-              text={`${+((servers.cpuUsage * 100).toFixed(2))}%`}
+              value={+((servers.cpu * 100).toFixed(2))}
+              text={`${+((servers.cpu * 100).toFixed(2))}%`}
             />
           </Item>
         </DiagramsContainer>
