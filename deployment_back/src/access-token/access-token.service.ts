@@ -22,7 +22,9 @@ export class AccessTokenService {
   async createOrUpdate(dto: AccessTokenDto) {
     const accessToken = await this.jwtService.signAsync(dto);
 
-    await this.redisClient.set(dto.userId, accessToken);
+    const timeLive = process.env.ACCESS_TIMEOUT;
+
+    await this.redisClient.set(dto.userId, accessToken, 'EX', timeLive);
 
     return accessToken;
   }
