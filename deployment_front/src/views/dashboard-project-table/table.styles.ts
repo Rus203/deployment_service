@@ -14,7 +14,7 @@ export const LinkToDeploy = styled(Link)`
 
 export const FixedTable = styled.div`
   height: 70vh;
-  overflow-y: scroll;
+  overflow-y: auto;
 `
 
 export const ControlButtons = styled.div`

@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { Button } from '@mui/material'
 import Card from '@mui/material/Card'
 import Table from '@mui/material/Table'
@@ -7,31 +6,23 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { IMiniBack } from '../../interface/miniback.interface'
-import { Container, LinkToDeploy, FixedTable } from './table.styles'
-import { useGetMinibacksQuery, useDeleteMinibackMutation, useDeployMinibackMutation } from '../../services'
-import { MiniBackState } from '../../utils/mini-back-state.enum'
-import Spinner from '../../Components/Spinner'
+import { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IMiniBack } from '../../interface/miniback.interface'
+import { useGetMinibacksQuery } from '../../services'
+import { MiniBackState } from '../../utils/mini-back-state.enum'
+import TableItem from './table-item/table-item.component'
+import { Container, FixedTable, LinkToDeploy } from './table.styles'
 
 const DashBoardMiniBackTable: FC = () => {
   const navigate = useNavigate()
   const { data = [] } = useGetMinibacksQuery(undefined)
 
-  const [deleteMiniBack, { isLoading: isLoadingDelete }] = useDeleteMinibackMutation()
-  const [deployMiniBack, { isLoading: isLoadingDeploy }] = useDeployMinibackMutation()
-
-  const followToProjects = (miniBackId: string) => {
+  const handleFollowToProjects = (miniBackId: string) => {
     const miniBackItem = data.find(item => item.id === miniBackId)
     if (miniBackItem?.deployState === MiniBackState.DEPLOYED) {
       navigate(`/mini-back/${miniBackId}`)
     }
-  }
-
-  const handleDelete: any = (event: any,minibackId: any) => {
-    event.stopPropagation();
-    deleteMiniBack(minibackId)
-      .catch(e => console.log(e))
   }
 
   return (
@@ -52,41 +43,10 @@ const DashBoardMiniBackTable: FC = () => {
               </TableHead>
               <TableBody>
                 {
-                  isLoadingDelete || isLoadingDeploy
-                    ? <tr><td colSpan={6}><Spinner typeOfMessages={null} /></td></tr>
-                    : (
-                      data.map((row: IMiniBack, index) => (
-                        <TableRow
-                          hover
-                          key={row.id}
-                          onClick={() => followToProjects(row.id)}
-                          sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
-                        >
-                          <TableCell>{index + 1}</TableCell>
-                          <TableCell>{row.name}</TableCell>
-                          <TableCell>{row.serverUrl}</TableCell>
-                          <TableCell>{row.port}</TableCell>
-                          <TableCell>{row.deployState}</TableCell>
-                          <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-                            <Button
-                              variant='outlined'
-                              onClick={() => deployMiniBack(row.id)}
-                              disabled={row.deployState === MiniBackState.DEPLOYED
-                                || row.deployState === MiniBackState.FAILED}
-                            >
-                              Deploy
-                            </Button>
-                            <Button
-                              onClick={(e) => handleDelete(e, row.id)}
-                              variant='outlined'
-                              color='error'
-                            >
-                              Delete
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      )
-                      ))}
+                  data.map((row: IMiniBack, index) => (
+                    <TableItem key={index} index={index} row={row} followToProjects={handleFollowToProjects} />
+                  )
+                  )}
               </TableBody>
             </Table>
           </FixedTable>
@@ -98,6 +58,7 @@ const DashBoardMiniBackTable: FC = () => {
       </LinkToDeploy>
     </Container>
   )
+
 }
 
 export default DashBoardMiniBackTable

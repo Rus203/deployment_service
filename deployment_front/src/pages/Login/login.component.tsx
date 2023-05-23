@@ -16,13 +16,13 @@ import EyeOffOutline from "mdi-material-ui/EyeOffOutline";
 import EyeOutline from "mdi-material-ui/EyeOutline";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import Alert from "../../Components/Alert";
 import Link from "../../Components/Link/LInk";
 import { useLoginUserMutation } from "../../services";
 import { setCredentials } from "../../store/features";
 import { useAppDispatch } from "../../store/hooks";
 import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1";
-import { BoxStyled, StyledAlertContainer } from "./login.styles";
-import Alert from "../../Components/Alert";
+import { BoxStyled } from "./login.styles";
 
 interface State {
   password: string;

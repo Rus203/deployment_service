@@ -5,7 +5,4 @@ export const Container = styled.div`
 `
 
 export const Wrapper = styled.div` 
-  position: absolute;
-  top: 30%;
-  left: 50%;
 `
