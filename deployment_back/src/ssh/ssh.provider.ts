@@ -19,7 +19,14 @@ export class SshProvider extends ChildProcessCommandProvider {
       const remoteFullPath = sshLink + ':' + remoteDirectory;
       const childProcess = spawn(
         'scp',
-        ['-i', pathToSSHPrivateKey, '-r', localDirectory, remoteFullPath],
+        [
+          '-i',
+          pathToSSHPrivateKey,
+          '-o StrictHostKeyChecking=no',
+          '-r',
+          localDirectory,
+          remoteFullPath,
+        ],
         {
           shell: true,
         },
@@ -68,11 +75,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'eval $(ssh-agent -s);' +
-            `cd ~/${nameRemoteRepository};` +
-            'chmod 600 id_rsa;' +
-            'ssh-add id_rsa;' +
-            `git clone ${gitProjectLink}`,
+          `"sudo ~/${nameRemoteRepository}/pull-mini-back.script.sh ${gitProjectLink} ${nameRemoteRepository}"`,
         ],
         {
           shell: true,
@@ -95,10 +98,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          `cd ~/${nameRemoteRepository}/mini_back;` +
-            'ls;' +
-            'npm run npm:install;' +
-            'npm run pm2:start;',
+          `"sudo ~/${nameRemoteRepository}/run-mini-back.script.sh ${nameRemoteRepository}"`,
         ],
         {
           shell: true,
@@ -121,7 +121,7 @@ export class SshProvider extends ChildProcessCommandProvider {
           sshLink,
           '-i',
           pathToSSHPrivateKey,
-          'pm2 delete all;' + `rm -r ~/${nameRemoteRepository};`,
+          `"sudo ~/${nameRemoteRepository}/delete-mini-back.script.sh ${nameRemoteRepository}"`,
         ],
         {
           shell: true,

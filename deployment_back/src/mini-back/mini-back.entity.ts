@@ -4,10 +4,9 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
 import { User } from '../user/user.entity';
-import { Project } from 'src/project/project.entity';
+import { ProjectState } from '../utils';
 
 @Entity('mini-backs')
 export class MiniBack {
@@ -19,6 +18,9 @@ export class MiniBack {
 
   @Column({ length: 255, name: 'ssh_server_private_key_path' })
   sshServerPrivateKeyPath: string;
+
+  @Column({ name: 'ssh_connection_string', length: 2047 })
+  sshConnectionString: string;
 
   @Column({ name: 'server_url', length: 2047 })
   serverUrl: string;
@@ -36,9 +38,13 @@ export class MiniBack {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @OneToMany(() => Project, (project) => project.miniBack)
-  projects: Project[];
+  @Column({
+    default: ProjectState.UNDEPLOYED,
+    type: 'enum',
+    enum: ProjectState,
+  })
+  deployState: ProjectState;
 
-  @Column({ default: false, type: 'boolean' })
-  isDeploy: boolean;
+  @Column()
+  port: number;
 }

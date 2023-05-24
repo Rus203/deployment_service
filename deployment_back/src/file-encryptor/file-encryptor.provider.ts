@@ -9,6 +9,7 @@ import {
   access,
   rmSync,
   existsSync,
+  chmodSync,
 } from 'fs';
 
 import { readdir } from 'node:fs/promises';
@@ -19,12 +20,11 @@ import { pipeline } from 'node:stream';
 @Injectable()
 export class FileEncryptorProvider implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
-    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-key');
+    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-configs');
     const miniBackPrivateKey = path.join(commonFolder, 'id_rsa');
 
     if (existsSync(miniBackPrivateKey)) {
       await this.encryptFilesOnPlace([miniBackPrivateKey]);
-      await this.removeUnencryptedFiles(commonFolder);
     }
   }
 
@@ -103,7 +103,10 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
         const readStream = createReadStream(path);
         const writesStream = createWriteStream(path.replace(/.enc$/, ''));
         return this.decrypt(readStream, writesStream)
-          .then(() => resolve(true))
+          .then(() => {
+            chmodSync(path.replace(/.enc$/, ''), 0o600);
+            resolve(true);
+          })
           .catch(() => reject(false));
       } else {
         Promise.allSettled(
@@ -112,7 +115,9 @@ export class FileEncryptorProvider implements OnApplicationBootstrap {
             const writesStream = createWriteStream(
               pathItem.replace(/.enc$/, ''),
             );
-            return this.decrypt(readStream, writesStream);
+            return this.decrypt(readStream, writesStream).then(() => {
+              chmodSync(pathItem.replace(/.enc$/, ''), 0o600);
+            });
           }),
         )
           .then(() => {

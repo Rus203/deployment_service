@@ -7,7 +7,9 @@ import { JwtModule } from '@nestjs/jwt';
   imports: [
     JwtModule.register({
       secret: process.env.ACCESS_SECRET,
-      signOptions: { expiresIn: process.env.ACCESS_TIMEOUT },
+      signOptions: {
+        expiresIn: (Number(process.env.ACCESS_TIMEOUT) * 1000).toString(),
+      },
     }),
   ],
   exports: [AccessTokenService],
