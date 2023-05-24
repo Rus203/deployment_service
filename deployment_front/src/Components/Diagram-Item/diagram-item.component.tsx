@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { IMiniBack } from '../../interface/miniback.interface';
 
 import { CircularProgressbar } from 'react-circular-progressbar';
@@ -34,30 +34,21 @@ const getPercentToBar = (total: string, current: string): number => {
 }
 
 const DiagramItem: FC<IProps> = ({ miniback }) => {
-  const [servers, setServers] = useState<IStatistic>({
-    rom: { totalSpace: "0Gb", usedSpace: "0Gb" },
-    ram: { totalMemory: "0Gb", usedMemory: "0Gb" },
-    cpu: 0
-  })
+  const [servers, setServers] = useState<IStatistic>()
 
   useEffect(() => {
     const { port, serverUrl } = miniback
     if (miniback.deployState === MiniBackState.DEPLOYED) {
       const socket = io(`http://${serverUrl}:${port}`)
 
-      const intervalId =  setInterval(() => {
-        socket.emit('message')
-      }, 1000)
-
       socket.on('message', data => {
         setServers(data)
       })
 
-      return () => clearInterval(intervalId)
     }
   }, [miniback])
 
-  return (
+  return !servers ? null : (
     <Instance>
       <SectionName>{capitalizeFirstLowercaseRest(miniback.name)}</SectionName>
       <Section>
