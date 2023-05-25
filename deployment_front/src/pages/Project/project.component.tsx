@@ -2,11 +2,11 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import axios from 'axios';
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useGetMinibackQuery, useCreateProjectMutation } from '../../services';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useCreateProjectMutation, useGetMinibackQuery } from '../../services';
+import { useAppSelector } from "../../store/hooks";
 import {
   ButtonsContainer,
   Container,
@@ -20,8 +20,6 @@ import {
   SectionInputs,
   SelectProjectsContainer,
 } from "./project.styles";
-import { useAppSelector } from "../../store/hooks";
-import { ConsoleNetwork } from "mdi-material-ui";
 
 interface IProject {
   name: string,
@@ -97,7 +95,6 @@ export const Project: FC = () => {
                   defaultValue={email}
                   inputProps={{ readOnly: true }}
                   {...register("email", {
-                    // required: 'Email is required',
                     maxLength: 63,
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,

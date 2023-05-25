@@ -7,11 +7,10 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import { FC } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useGetMinibackQuery, useGetProjectsQuery } from '../../services'
 import TableItemProject from './table-item-project/table-item-project'
 import { Container, ControlButtons, FixedTable, LinkToDeploy } from './table.styles'
-import { useLocation } from 'react-router-dom'
-import { IProject } from '../../interface/project.interface'
 
 const DashBoardProjectTable: FC = () => {
   const location = useLocation()
@@ -38,7 +37,7 @@ const DashBoardProjectTable: FC = () => {
               </TableHead>
               <TableBody>
                 {(projects !== undefined && projects.map((row: any, index: number) => (
-                  <TableItemProject key={index} index={index} isFetching={isFetching} row={row} miniback={miniback}/>
+                  <TableItemProject key={index} index={index} isFetching={isFetching} row={row} miniback={miniback} />
                 )))
                 }
 

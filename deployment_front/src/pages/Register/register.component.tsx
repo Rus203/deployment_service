@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, MouseEvent, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -18,10 +18,10 @@ import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1"
 import { FormHelperText } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import Alert from "../../Components/Alert";
 import Link from "../../Components/Link/LInk";
 import { useRegisterUserMutation } from "../../services";
-import { BoxStyled, StyledAlertContainer } from "./register.styles";
-import Alert from "../../Components/Alert";
+import { BoxStyled } from "./register.styles";
 
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
   [theme.breakpoints.up("sm")]: { width: "28rem" },
@@ -65,16 +65,10 @@ const Register: FC = () => {
     }
   };
 
-  const handleChange =
-    (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-      setValues({ ...values, [prop]: event.target.value });
-    };
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword });
   };
-  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
+
 
   useEffect(() => {
     if (isShowAlert) {

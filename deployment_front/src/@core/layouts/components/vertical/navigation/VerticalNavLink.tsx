@@ -1,25 +1,20 @@
-// ** React Imports
+
 import { ElementType, ReactNode } from 'react'
 
-// ** Next Imports
-// import Link from 'next/link'
-// import { useRouter } from 'next/router'
 
-// ** MUI Imports
+import Box, { BoxProps } from '@mui/material/Box'
 import Chip from '@mui/material/Chip'
 import ListItem from '@mui/material/ListItem'
-import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import Box, { BoxProps } from '@mui/material/Box'
-import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemButton, { ListItemButtonProps } from '@mui/material/ListItemButton'
-import { NavLink } from '../../../types'
-import { Settings } from '../../../../context/settingsContext'
-import themeConfig from '../../../../../configs/themeConfig'
-import { handleURLQueries } from '../../../utils'
-import UserIcon from '../../UserIcon'
-import { useLocation, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router-dom'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import Typography from '@mui/material/Typography'
+import { styled } from '@mui/material/styles'
+import { useLocation } from 'react-router-dom'
 import Link from '../../../../../Components/Link/LInk'
+import themeConfig from '../../../../../configs/themeConfig'
+import { Settings } from '../../../../context/settingsContext'
+import { NavLink } from '../../../types'
+import UserIcon from '../../UserIcon'
 
 // ** Configs Import
 
