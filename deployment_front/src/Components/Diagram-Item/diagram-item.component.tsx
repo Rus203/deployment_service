@@ -9,6 +9,7 @@ import io from 'socket.io-client'
 import { MiniBackState } from '../../utils/mini-back-state.enum';
 import { IStatistic } from '../../interface/statictic.interface';
 import { capitalizeFirstLowercaseRest } from '../../utils/upper-first-letter';
+import Spinner from '../Spinner';
 
 interface IProps {
   miniback: IMiniBack;
@@ -48,7 +49,7 @@ const DiagramItem: FC<IProps> = ({ miniback }) => {
     }
   }, [miniback])
 
-  return !servers ? null : (
+  return !servers ? <Spinner typeOfMessages={null}/> : (
     <Instance>
       <SectionName>{capitalizeFirstLowercaseRest(miniback.name)}</SectionName>
       <Section>

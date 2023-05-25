@@ -10,6 +10,7 @@ import { redisConfig } from './configs';
 import { SSHModule } from './ssh/ssh.module';
 import { FileEncryptorModule } from './file-encryptor/files-encryptor.module';
 import { MiniBackModule } from './mini-back/mini-back.module';
+import { StatusDeployModule } from './status-deploy/status-deploy.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MiniBackModule } from './mini-back/mini-back.module';
     SSHModule,
     FileEncryptorModule,
     MiniBackModule,
+    StatusDeployModule,
   ],
   controllers: [],
   providers: [],
