@@ -16,11 +16,14 @@ import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { ProjectState, normalizeProjectName } from 'src/utils';
 import { chmodSync } from 'fs';
+import { StatusDeployGateway } from '../status-deploy/status-deploy.gateway';
+import { DeployStatusMiniBack, DeleteStatusMiniBack } from 'src/utils';
 
 @Injectable()
 export class MiniBackService implements OnApplicationBootstrap {
   rootDirectory = path.join(__dirname, '..', '..');
   constructor(
+    private statusDeployGateway: StatusDeployGateway,
     private sshProvider: SshProvider,
     private fileEncryptorProvider: FileEncryptorProvider,
     @InjectRepository(MiniBack)
@@ -123,6 +126,8 @@ export class MiniBackService implements OnApplicationBootstrap {
       );
     }
 
+    this.statusDeployGateway.sendStatus(DeployStatusMiniBack.START);
+
     await this.fileEncryptorProvider.decryptFilesOnPlace([
       miniBackPrivateKey,
       sshServerPrivateKeyPath,
@@ -142,6 +147,8 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
+      this.statusDeployGateway.sendStatus(DeployStatusMiniBack.PUT_DIRECTORY);
+
       // pull mini back from github repo
       await this.sshProvider.pullMiniBack(
         {
@@ -152,6 +159,8 @@ export class MiniBackService implements OnApplicationBootstrap {
         gitProjectLink,
       );
 
+      this.statusDeployGateway.sendStatus(DeployStatusMiniBack.PULL_MINIBACK);
+
       await this.sshProvider.runMiniBack(
         {
           sshLink: sshConnectionString,
@@ -160,17 +169,21 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
+      this.statusDeployGateway.sendStatus(DeployStatusMiniBack.RUN_MINIBACK);
+
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
         { deployState: ProjectState.DEPLOYED },
       );
     } catch (error: any) {
+      console.log('from catch block: ', error);
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
         { deployState: ProjectState.FAILED },
       );
       throw new BadRequestException(error);
     } finally {
+      this.statusDeployGateway.sendStatus(DeployStatusMiniBack.FINISH);
       await this.fileEncryptorProvider.encryptFilesOnPlace(
         [miniBackPrivateKey, sshServerPrivateKeyPath].map((path) =>
           path.replace(/.enc$/, ''),
@@ -186,6 +199,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     let { sshServerPrivateKeyPath, sshConnectionString, nameRemoteRepository } =
       currentMiniBack;
     try {
+      this.statusDeployGateway.sendStatus(DeployStatusMiniBack.START);
       await this.fileEncryptorProvider.decryptFilesOnPlace([
         sshServerPrivateKeyPath,
       ]);
@@ -198,12 +212,19 @@ export class MiniBackService implements OnApplicationBootstrap {
         },
         nameRemoteRepository,
       );
+
+      this.statusDeployGateway.sendStatus(
+        DeleteStatusMiniBack.DELETE_FROM_SERVER,
+      );
     } catch (error: any) {
       throw error;
     } finally {
       await this.fileEncryptorProvider.encryptFilesOnPlace(
         sshServerPrivateKeyPath.replace(/.enc$/, ''),
       );
+
+      this.statusDeployGateway.sendStatus(DeleteStatusMiniBack.DELETE_FROM_DB);
+      this.statusDeployGateway.sendStatus(DeleteStatusMiniBack.FINISH);
     }
   }
 }

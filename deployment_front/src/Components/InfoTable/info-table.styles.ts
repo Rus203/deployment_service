@@ -1,6 +1,5 @@
 import { Box, TableContainer } from "@mui/material";
 import { styled } from "@mui/system";
-import { ResponsiveContainer } from "recharts";
 
 export const BoxStyled = styled(Box)`
   display: flex;

@@ -4,7 +4,6 @@ import Box, { BoxProps } from '@mui/material/Box'
 import Typography, { TypographyProps } from '@mui/material/Typography'
 import { styled } from '@mui/material/styles'
 import Link from '../../../../../Components/Link/LInk'
-import themeConfig from '../../../../../configs/themeConfig'
 import { Settings } from '../../../../context/settingsContext'
 
 interface Props {
