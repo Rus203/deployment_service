@@ -18,11 +18,11 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Alert from "../../Components/Alert";
 import Link from "../../Components/Link/LInk";
-import { useLoginUserMutation } from "../../services";
-import { setCredentials } from "../../store/features";
+import { setCredentials } from "../../store/Slices";
 import { useAppDispatch } from "../../store/hooks";
 import FooterIllustrationsV1 from "../../views/pages/auth/FooterIllustrationsV1";
 import { BoxStyled } from "./login.styles";
+import axios from '../../utils/axios.instance'
 
 interface State {
   password: string;
@@ -41,7 +41,6 @@ const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
 
 const Login: FC = () => {
   const dispatch = useAppDispatch();
-  const [login] = useLoginUserMutation();
   const [isShowAlert, setShowAlert] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -56,15 +55,15 @@ const Login: FC = () => {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      const answer = await login(data).unwrap()
-      dispatch(setCredentials(answer));
-      navigate("/");
-    } catch (error: any) {
-      setShowAlert(true);
-      console.log(error)
-      setErrorMessage(error.data.message);
-    }
+    axios.post('/auth/sign-in', data)
+    .then(res => {
+      dispatch(setCredentials(res.data))
+      navigate('/')
+    })
+    .catch(error => {
+      setShowAlert(true)
+      setErrorMessage(error.response.data.message)
+    })
   };
 
   const handleClickShowPassword = () => {

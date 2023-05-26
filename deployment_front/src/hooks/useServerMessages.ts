@@ -32,9 +32,7 @@ export const useServerMessages = (typeOfEvent: MessageEvent | null) => {
   useEffect(() => {
     if (!typeOfEvent) return;
 
-    const socket = io(process.env.REACT_APP_BACK_WEBSOCKET_DEV_URL!, {
-      transports: ["websocket"],
-    });
+    const socket = io(process.env.REACT_APP_BACK_WEBSOCKET_DEV_URL!);
 
     socket.on(typeOfEvent, ({ message }: { message: Message }) => {
       setCurrentMessage(message);

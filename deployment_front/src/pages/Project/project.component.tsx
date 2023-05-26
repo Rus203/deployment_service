@@ -5,7 +5,6 @@ import {
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useCreateProjectMutation, useGetMinibackQuery } from '../../services';
 import { useAppSelector } from "../../store/hooks";
 import {
   ButtonsContainer,
@@ -34,12 +33,10 @@ export const Project: FC = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IProject>({
     mode: 'onChange'
   });
-  const { email } = useAppSelector(state => state.auth)
+  // const { email } = useAppSelector(state => state.auth)
   const navigate = useNavigate()
   const location = useLocation()
   const miniBackId = location.pathname.split('/')[2]
-  const { data: miniback } = useGetMinibackQuery({ id: miniBackId })
-  const [createProject] = useCreateProjectMutation()
 
   const envFile = watch('envFile');
   const sshGitPrivateKey = watch('sshGitPrivateKey')
@@ -52,11 +49,6 @@ export const Project: FC = () => {
     formData.append('gitLink', data.gitLink)
     formData.append('envFile', data.envFile[0])
     formData.append('sshGitPrivateKey', data.sshGitPrivateKey[0])
-    createProject({
-      body: formData, serverUrl: miniback?.serverUrl, port: miniback?.port
-    })
-      .catch(e => console.log(e))
-      .finally(() => navigate(`/mini-back/${miniBackId}`))
   }
 
   const comeBack = (): void => {
@@ -86,7 +78,7 @@ export const Project: FC = () => {
                   <FormHelperText>{errors.name.message}</FormHelperText>
                 )}
               </FormControl>
-              <FormControl>
+              {/* <FormControl>
                 <TextField
                   label="Email"
                   size="small"
@@ -105,7 +97,7 @@ export const Project: FC = () => {
                 {errors.email && (
                   <FormHelperText>{errors.email.message}</FormHelperText>
                 )}
-              </FormControl>
+              </FormControl> */}
             </SectionInputs>
           </Section>
           <Section>
