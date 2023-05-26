@@ -5,6 +5,7 @@ import { IProject } from '../../../interface/project.interface';
 import { useDeleteProjectMutation, useDeployProjectMutation } from '../../../services';
 import { ProjectState } from '../../../utils/project-state.enum';
 import { IMiniBack } from '../../../interface/miniback.interface';
+import Alert from '../../../Components/Alert';
 
 type Props = {
   row: any,
@@ -16,6 +17,8 @@ type Props = {
 
 const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isShowAlert, setShowAlert] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [deleteProject] = useDeleteProjectMutation();
   const [deployProject] = useDeployProjectMutation();
 
@@ -24,21 +27,35 @@ const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
   const handleDeploy = (project: IProject) => {
     const { id } = project
     setIsLoading(true)
-    deployProject({
-      serverUrl: miniback?.serverUrl, port: miniback?.port, id
-    })
-      .catch(e => console.log(e))
-      .finally(() => setIsLoading(false))
+    try {
+      deployProject({
+        serverUrl: miniback?.serverUrl, port: miniback?.port, id
+      })
+    } catch (e: any) {
+      setShowAlert(true)
+      console.log(e.data.message)
+      setErrorMessage(e.data.message)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleDelete = (project: IProject) => {
     const { id } = project
     setIsLoading(true)
-    deleteProject({
-      serverUrl: miniback?.serverUrl, port: miniback?.port, id
-    })
-      .catch(e => console.log(e))
-      .finally(() => setIsLoading(false))
+    try {
+      deleteProject({
+        serverUrl: miniback?.serverUrl, port: miniback?.port, id
+      })
+    } catch (e: any) {
+      setShowAlert(true)
+      console.log(e.message)
+      setErrorMessage(e.message)
+      console.log("catchDelete")
+    } finally {
+      setIsLoading(false)
+      console.log("finDelete")
+    }
   }
 
   return (
@@ -64,7 +81,9 @@ const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
           <>
             <Button
               variant='outlined'
-              disabled={row.state !== ProjectState.UNDEPLOYED}
+              disabled={row.state !== ProjectState.UNDEPLOYED
+                || row.state === ProjectState.FAILED
+              }
               onClick={() => handleDeploy(row)}
             >Deploy</Button>
             <Button
@@ -76,8 +95,13 @@ const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
           </>
         }
       </TableCell>
-
+      {(errorMessage !== null && isShowAlert)
+        ?
+        <TableCell><Alert error={errorMessage} /></TableCell>
+        : null
+      }
     </TableRow>
+
   );
 };
 

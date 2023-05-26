@@ -1,9 +1,10 @@
 import { Button, TableCell, TableRow } from '@mui/material';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import Spinner from '../../../Components/Spinner';
 import { IMiniBack } from '../../../interface/miniback.interface';
 import { useDeleteMinibackMutation, useDeployMinibackMutation } from '../../../services';
 import { MiniBackState } from '../../../utils/mini-back-state.enum';
+import Alert from '../../../Components/Alert';
 
 type Props = {
   row: IMiniBack,
@@ -14,18 +15,51 @@ type Props = {
 const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
   const [deleteMiniBack, { isLoading: isLoadingDelete }] = useDeleteMinibackMutation()
   const [deployMiniBack, { isLoading: isLoadingDeploy }] = useDeployMinibackMutation()
+  const [isShowAlert, setShowAlert] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 
-  const handleDelete: any = (event: any, minibackId: any) => {
+  const handleDelete: any = async (event: any, minibackId: any) => {
     event.stopPropagation();
-    deleteMiniBack(minibackId)
-      .catch(e => console.log(e))
+    try {
+      await deleteMiniBack(minibackId).unwrap()
+    } catch (e: any) {
+      setShowAlert(true)
+      console.log(e.data.message)
+      setErrorMessage(e.data.message)
+    } 
   }
 
+  const handleDeployMiniback = async (id: string) => {
+    try {
+      await deployMiniBack(id).unwrap()
+
+    } catch (e: any) {
+      setShowAlert(true)
+      console.log(e.data.message)
+      setErrorMessage(e.data.message)
+    } 
+  }
+
+  const handleFollowToProjects = (id: string) => {
+    if (isLoadingDelete || isLoadingDeploy) {
+      return
+    }
+    return followToProjects(id)
+  }
+
+  useEffect(() => {
+    if (isShowAlert) {
+      const timerId = setTimeout(() => setShowAlert(false), 5000);
+      return () => clearTimeout(timerId);
+    }
+  }, [isShowAlert])
+
   return (
+
     <TableRow
       hover
-      onClick={() => followToProjects(row.id)}
+      onClick={() => handleFollowToProjects(row.id)}
       sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
     >
       <TableCell>{index + 1}</TableCell>
@@ -37,12 +71,12 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
 
       <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
         {isLoadingDelete || isLoadingDeploy ?
-          <Spinner typeOfMessages={null} />
+          <span><Spinner typeOfMessages={null} /></span>
           :
           <>
             <Button
               variant='outlined'
-              onClick={() => deployMiniBack(row.id)}
+              onClick={() => handleDeployMiniback(row.id)}
               disabled={row.deployState === MiniBackState.DEPLOYED
                 || row.deployState === MiniBackState.FAILED}
             >
@@ -58,8 +92,13 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
           </>
         }
       </TableCell>
-
+      {(errorMessage !== null && isShowAlert)
+        ?
+        <TableCell><Alert error={errorMessage} /></TableCell>
+        : null
+      }
     </TableRow>
+
   );
 }
 
