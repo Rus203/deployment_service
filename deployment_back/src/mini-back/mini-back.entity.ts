@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
-import { ProjectState } from '../utils';
+import { ProjectState } from '../enums';
 
 @Entity('mini-backs')
 export class MiniBack {

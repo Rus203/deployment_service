@@ -9,10 +9,10 @@ import { Server } from 'socket.io';
 import { Injectable, UseGuards } from '@nestjs/common';
 import { MiniBackService } from 'src/mini-back/mini-back.service';
 import { GetMiniBackDto } from 'src/mini-back/dto/get-mini-back.dto';
-import { plainToClass } from 'class-transformer';
-import { validate } from 'class-validator';
 import { AuthGuard } from './socket-deploy.guard';
 import { Socket } from 'socket.io';
+
+// find out how to use only one instance if socket io
 
 @Injectable()
 @WebSocketGateway({ cors: '*' })

@@ -11,6 +11,7 @@ import { SSHModule } from './ssh/ssh.module';
 import { FileEncryptorModule } from './file-encryptor/files-encryptor.module';
 import { MiniBackModule } from './mini-back/mini-back.module';
 import { SocketDeployModule } from './socket-deploy/socket-deploy.module';
+import { ProgressModule } from './socket-progress/progress.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SocketDeployModule } from './socket-deploy/socket-deploy.module';
     FileEncryptorModule,
     MiniBackModule,
     SocketDeployModule,
+    ProgressModule,
   ],
   controllers: [],
   providers: [],
