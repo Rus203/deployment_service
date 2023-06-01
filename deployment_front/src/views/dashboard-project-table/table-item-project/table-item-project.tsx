@@ -4,7 +4,6 @@ import Spinner from '../../../Components/Spinner';
 import { IProject } from '../../../interface/project.interface';
 import { ProjectState } from '../../../utils/project-state.enum';
 import { IMiniBack } from '../../../interface/miniback.interface';
-import io from 'socket.io-client'
 
 type Props = {
   row: any,
@@ -16,14 +15,12 @@ type Props = {
 
 const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-
-
-
   const handleDeploy = (project: IProject) => {
     setIsLoading(true)
   }
 
   const handleDelete = (project: IProject) => {  }
+
 
   return (
     <TableRow
@@ -48,7 +45,9 @@ const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
           <>
             <Button
               variant='outlined'
-              disabled={row.state !== ProjectState.UNDEPLOYED}
+              disabled={row.state !== ProjectState.UNDEPLOYED
+                || row.state === ProjectState.FAILED
+              }
               onClick={() => handleDeploy(row)}
             >Deploy</Button>
             <Button
@@ -60,8 +59,13 @@ const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
           </>
         }
       </TableCell>
-
+      {/* {(errorMessage !== null && isShowAlert)
+        ?
+        <TableCell><Alert error={errorMessage} /></TableCell>
+        : null
+      } */}
     </TableRow>
+
   );
 };
 

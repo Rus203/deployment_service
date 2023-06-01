@@ -45,6 +45,7 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
     }
 
   return (
+
     <TableRow
       hover
       onClick={() => followToProjects(row.id)}
@@ -74,8 +75,13 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
               Delete
             </Button>
       </TableCell>
-
+      {/* {(errorMessage !== null && isShowAlert)
+        ?
+        <TableCell><Alert error={errorMessage} /></TableCell>
+        : null
+      } */}
     </TableRow>
+
   );
 }
 
