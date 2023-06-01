@@ -1,8 +1,8 @@
-import styled from "styled-components";
 import {
   FormControl as MuiFormControl,
   FormHelperText as MuiFormHelperText,
 } from "@mui/material";
+import styled from "styled-components";
 
 export const Container = styled.div`
   display: flex;
@@ -36,7 +36,13 @@ export const StatisticsContainer = styled.div`
 `;
 
 export const FormControl = styled(MuiFormControl)`
-  width: 30%;
+  width: 25vw;
+  max-width: 250px;
+`;
+
+export const FormControlPorts = styled(MuiFormControl)`
+  width: 25vw;
+  max-width: 250px;
 `;
 
 export const FileInput = styled.input.attrs({
@@ -59,11 +65,22 @@ export const SectionHeader = styled.h3`
 export const SectionInputs = styled.div`
   display: flex;
   gap: 20px;
+  align-items: start;
+`;
+
+export const InputField = styled.div`
+  display: flex;
+`
+
+export const SectionInputsPort = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   align-items: center;
 `;
 
 export const ButtonsContainer = styled.div`
-  margin-top: 30px ;
+  margin-top: 30px;
   display: flex;
   column-gap: 30px;
 `;
@@ -77,4 +94,3 @@ export const FormHelperText = styled(MuiFormHelperText)`
   width: 100%;
   text-transform: none;
 `;
-

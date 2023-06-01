@@ -95,7 +95,7 @@ const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
           </>
         }
       </TableCell>
-      {(errorMessage !== null && isShowAlert)
+      {(errorMessage !== null && isShowAlert && errorMessage.length > 0)
         ?
         <TableCell><Alert error={errorMessage} /></TableCell>
         : null

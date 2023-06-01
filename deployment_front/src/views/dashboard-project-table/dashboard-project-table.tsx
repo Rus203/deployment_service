@@ -30,7 +30,7 @@ const DashBoardProjectTable: FC = () => {
                   <TableCell>№</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Git link</TableCell>
-                  <TableCell>Port</TableCell>
+                  <TableCell>Ports</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell colSpan={4} align='center'>Controls</TableCell>
                 </TableRow>
