@@ -27,7 +27,6 @@ const BaseRouter: FC = () => {
               <Route path="diagrams" element={<ProtectedComponent component={Diagrams} />} />
               <Route path=':miniBackId' element={<ProtectedComponent component={ProjectDashboard} />} />
               <Route path=":miniBackId/project" element={<ProtectedComponent component={Project} />} />
-
             </Route>
           </Route>
           <Route path="/*" element={<Whooops />} />

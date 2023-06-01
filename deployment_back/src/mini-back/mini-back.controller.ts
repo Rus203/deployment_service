@@ -100,33 +100,33 @@ export class MiniBackController {
     });
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({
-    description: 'Bad request',
-  })
-  @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
-  @ApiInternalServerErrorResponse({ description: 'Server error' })
-  @Post('deploy/:id')
-  async deployMiniBack(
-    @Param('id') id: string,
-    @Req() req: Request & { user: User },
-  ) {
-    return await this.miniBackService.placeMiniBake({
-      id,
-      userId: req.user.id,
-    });
-  }
+  // @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  // @ApiBadRequestResponse({
+  //   description: 'Bad request',
+  // })
+  // @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
+  // @ApiInternalServerErrorResponse({ description: 'Server error' })
+  // @Post('deploy/:id')
+  // async deployMiniBack(
+  //   @Param('id') id: string,
+  //   @Req() req: Request & { user: User },
+  // ) {
+  //   return await this.miniBackService.placeMiniBake({
+  //     id,
+  //     userId: req.user.id,
+  //   });
+  // }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({ description: 'Bad request' })
-  @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
-  @ApiInternalServerErrorResponse({ description: 'Server error' })
-  @Delete(':id')
-  async delete(@Param('id') id: string, @Req() req: Request & { user: User }) {
-    await this.miniBackService.delete({ id, userId: req.user.id });
-  }
+  // @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  // @ApiBadRequestResponse({ description: 'Bad request' })
+  // @ApiNotFoundResponse({ description: 'The instance of mini back not found' })
+  // @ApiInternalServerErrorResponse({ description: 'Server error' })
+  // @Delete(':id')
+  // async delete(@Param('id') id: string, @Req() req: Request & { user: User }) {
+  //   await this.miniBackService.delete({ id, userId: req.user.id });
+  // }
 }

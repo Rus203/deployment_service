@@ -8,15 +8,11 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import { FC } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useGetMinibackQuery, useGetProjectsQuery } from '../../services'
 import TableItemProject from './table-item-project/table-item-project'
 import { Container, ControlButtons, FixedTable, LinkToDeploy } from './table.styles'
 
 const DashBoardProjectTable: FC = () => {
   const location = useLocation()
-  const miniBackId = location.pathname.split('/')[2]
-  const { data: miniback } = useGetMinibackQuery({ id: miniBackId })
-  const { data: projects, isFetching } = useGetProjectsQuery({ serverUrl: miniback?.serverUrl, port: miniback?.port })
 
 
   return (
@@ -36,10 +32,10 @@ const DashBoardProjectTable: FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(projects !== undefined && projects.map((row: any, index: number) => (
+                {/* {(projects !== undefined && projects.map((row: any, index: number) => (
                   <TableItemProject key={index} index={index} isFetching={isFetching} row={row} miniback={miniback} />
                 )))
-                }
+                } */}
 
               </TableBody>
             </Table>

@@ -2,9 +2,9 @@ import { Box, Button, TableCell, TableRow, Typography } from '@mui/material';
 import { FC, useState } from 'react';
 import Spinner from '../../../Components/Spinner';
 import { IProject } from '../../../interface/project.interface';
-import { useDeleteProjectMutation, useDeployProjectMutation } from '../../../services';
 import { ProjectState } from '../../../utils/project-state.enum';
 import { IMiniBack } from '../../../interface/miniback.interface';
+import io from 'socket.io-client'
 
 type Props = {
   row: any,
@@ -16,30 +16,14 @@ type Props = {
 
 const TableItemProject: FC<Props> = ({ index, row, miniback, isFetching }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [deleteProject] = useDeleteProjectMutation();
-  const [deployProject] = useDeployProjectMutation();
 
 
 
   const handleDeploy = (project: IProject) => {
-    const { id } = project
     setIsLoading(true)
-    deployProject({
-      serverUrl: miniback?.serverUrl, port: miniback?.port, id
-    })
-      .catch(e => console.log(e))
-      .finally(() => setIsLoading(false))
   }
 
-  const handleDelete = (project: IProject) => {
-    const { id } = project
-    setIsLoading(true)
-    deleteProject({
-      serverUrl: miniback?.serverUrl, port: miniback?.port, id
-    })
-      .catch(e => console.log(e))
-      .finally(() => setIsLoading(false))
-  }
+  const handleDelete = (project: IProject) => {  }
 
   return (
     <TableRow

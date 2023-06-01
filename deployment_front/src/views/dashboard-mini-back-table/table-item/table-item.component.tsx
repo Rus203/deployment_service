@@ -1,9 +1,10 @@
 import { Button, TableCell, TableRow } from '@mui/material';
-import { FC } from 'react';
+import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import Spinner from '../../../Components/Spinner';
 import { IMiniBack } from '../../../interface/miniback.interface';
-import { useDeleteMinibackMutation, useDeployMinibackMutation } from '../../../services';
 import { MiniBackState } from '../../../utils/mini-back-state.enum';
+import io, { Socket } from 'socket.io-client'
+import { useAppSelector } from '../../../store/hooks';
 
 type Props = {
   row: IMiniBack,
@@ -12,15 +13,36 @@ type Props = {
 }
 
 const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
-  const [deleteMiniBack, { isLoading: isLoadingDelete }] = useDeleteMinibackMutation()
-  const [deployMiniBack, { isLoading: isLoadingDeploy }] = useDeployMinibackMutation()
+  const [loading, setLoading] = useState<boolean>(false)
+  const [socket, setSocket] = useState<Socket>()
+  const account = useAppSelector(state => state.auth.account)
 
+  useEffect(() => {
+    if (account) {
+      const url = process.env.NODE_ENV === 'production'
+      ? process.env.REACT_APP_SOCKET_BACK_DEPLOYMENT_URL!
+      : process.env.REACT_APP_SOCKET_BACK_DEV_URL!
 
-  const handleDelete: any = (event: any, minibackId: any) => {
-    event.stopPropagation();
-    deleteMiniBack(minibackId)
-      .catch(e => console.log(e))
+    console.log(url + `?token=${account.accessToken}`)
+    const socketInstance = io(url + `?token=${account.accessToken}`)
+    setSocket(socketInstance)
+
+    socket?.on('error', data => { console.log('errors ', data) })
+
+    return () => { socketInstance.disconnect() }
+    }
+  }, [])
+
+  const handleDelete = (event: SyntheticEvent) => {
+    event.stopPropagation()
+    // TODO: rebuild this one vai sockets
   }
+
+  const handleDeploy = (event: SyntheticEvent) => {
+    event.stopPropagation()
+    console.log('I am emitting right now')
+    socket?.emit('deploy-project', { id: row.id})
+    }
 
   return (
     <TableRow
@@ -34,29 +56,23 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       <TableCell>{row.port}</TableCell>
       <TableCell>{row.deployState}</TableCell>
 
-
       <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-        {isLoadingDelete || isLoadingDeploy ?
-          <Spinner typeOfMessages={null} />
-          :
-          <>
+          // There was spinner here
             <Button
               variant='outlined'
-              onClick={() => deployMiniBack(row.id)}
+              onClick={(event) => handleDeploy(event) }
               disabled={row.deployState === MiniBackState.DEPLOYED
                 || row.deployState === MiniBackState.FAILED}
             >
               Deploy
             </Button>
             <Button
-              onClick={(e: any) => handleDelete(e, row.id)}
+              onClick={(e: any) => handleDelete(e)}
               variant='outlined'
               color='error'
             >
               Delete
             </Button>
-          </>
-        }
       </TableCell>
 
     </TableRow>

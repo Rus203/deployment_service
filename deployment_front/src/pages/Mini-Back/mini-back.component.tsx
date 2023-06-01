@@ -2,12 +2,11 @@ import {
   Button,
   TextField
 } from "@mui/material";
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../../Components/Spinner';
 import { IMiniBack } from '../../interface/miniback.interface';
-import { useCreateMinibackMutation, useGetMinibacksQuery } from '../../services';
 import {
   ButtonsContainer,
   Container,
@@ -21,6 +20,7 @@ import {
   SectionInputs,
   SelectProjectsContainer
 } from "./mini-back.styles";
+import axios from '../../utils/axios.instance'
 
 interface IMiniBackInputs {
   name: string,
@@ -29,12 +29,11 @@ interface IMiniBackInputs {
 }
 
 export const MiniBack: FC = () => {
+  const [loading, setLoading] = useState<boolean>(false);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IMiniBackInputs>({
     mode: 'onChange'
   });
 
-  const { data } = useGetMinibacksQuery(undefined)
-  const [createMiniBack, { isLoading }] = useCreateMinibackMutation()
   const navigate = useNavigate();
 
   const sshServerPrivateKey = watch('sshServerPrivateKey');
@@ -45,14 +44,24 @@ export const MiniBack: FC = () => {
     formData.append('sshConnectionString', data.sshConnectionString)
     formData.append('sshServerPrivateKey', data.sshServerPrivateKey[0])
 
-    createMiniBack(formData).then(() => navigate('/'))
+    setLoading(true)
+    axios.post('mini-back', formData)
+      .then(() => {
+        navigate('/')
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   const comeBack = () => {
     navigate('/');
   }
 
-  return isLoading ? <Spinner typeOfMessages={null} /> : (
+  return loading ? <Spinner typeOfMessages={null} /> : (
     <Container>
       <FormContainer>
         <ProjectOptionsContainer>
@@ -90,19 +99,6 @@ export const MiniBack: FC = () => {
                       value: /^[a-zA-Z]+@[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/,
                       message: "Please Enter a valid ssh connection string"
                     },
-                    validate: (value: string) => {
-                      const testUrl = value.split('@')[1]
-                      if (data !== undefined) {
-                        let result = data.find((item: IMiniBack) => {
-                          const url = item.serverUrl
-                          return testUrl === url
-                        })
-
-                        return result ? "This server has already busy" : true
-                      }
-
-                      return true
-                    }
                   })}
                 />
                 {errors.sshConnectionString && (

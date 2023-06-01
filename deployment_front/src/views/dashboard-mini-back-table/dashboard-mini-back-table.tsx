@@ -6,20 +6,31 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { FC } from 'react'
+import { FC, useState, useEffect } from 'react'
+import axios from '../../utils/axios.instance'
 import { useNavigate } from 'react-router-dom'
 import { IMiniBack } from '../../interface/miniback.interface'
-import { useGetMinibacksQuery } from '../../services'
 import { MiniBackState } from '../../utils/mini-back-state.enum'
 import TableItem from './table-item/table-item.component'
 import { Container, FixedTable, LinkToDeploy } from './table.styles'
 
 const DashBoardMiniBackTable: FC = () => {
+  const [miniBackCollection, setMiniBackCollection] = useState<IMiniBack[]>([])
+
+  useEffect(() => {
+    axios.get('mini-back')
+      .then(res => {
+        setMiniBackCollection(res.data)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }, [])
+
   const navigate = useNavigate()
-  const { data = [] } = useGetMinibacksQuery(undefined)
 
   const handleFollowToProjects = (miniBackId: string) => {
-    const miniBackItem = data.find(item => item.id === miniBackId)
+    const miniBackItem = miniBackCollection.find(item => item.id === miniBackId)
     if (miniBackItem?.deployState === MiniBackState.DEPLOYED) {
       navigate(`/mini-back/${miniBackId}`)
     }
@@ -43,7 +54,7 @@ const DashBoardMiniBackTable: FC = () => {
               </TableHead>
               <TableBody>
                 {
-                  data.map((row: IMiniBack, index) => (
+                  miniBackCollection.map((row: IMiniBack, index) => (
                     <TableItem key={index} index={index} row={row} followToProjects={handleFollowToProjects} />
                   )
                   )}
@@ -52,7 +63,6 @@ const DashBoardMiniBackTable: FC = () => {
           </FixedTable>
         </TableContainer>
       </Card>
-
       <LinkToDeploy href='/mini-back'>
         <Button variant="contained">Create</Button>
       </LinkToDeploy>

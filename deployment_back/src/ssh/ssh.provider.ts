@@ -131,4 +131,27 @@ export class SshProvider extends ChildProcessCommandProvider {
       this.handleProcessErrors(childProcess, resolve, reject);
     });
   }
+
+  pullDocker(
+    { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    nameRemoteRepository: string,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const childProcess = spawn(
+        'ssh',
+        [
+          '-T',
+          sshLink,
+          '-i',
+          pathToSSHPrivateKey,
+          `"sudo ~/${nameRemoteRepository}/pull-docker.script.sh"`,
+        ],
+        {
+          shell: true,
+        },
+      );
+
+      this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
 }
