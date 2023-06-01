@@ -26,9 +26,6 @@ export class SocketDeployGateway {
     @MessageBody() dto: GetMiniBackDto,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('run deploy via socket');
-    console.log('data ', dto);
-    console.log(client.data.payload);
     this.miniBackService
       .placeMiniBake({ ...dto, userId: client.data.payload.id })
       .catch((error) => {
@@ -49,8 +46,6 @@ export class SocketDeployGateway {
       });
     });
 
-    console.log('run deploy via socket');
-    console.log('data ', dto);
     this.miniBackService.delete(dto).catch((error) => {
       this.server.emit('error', error.message);
     });

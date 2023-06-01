@@ -1,8 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
   OnApplicationBootstrap,
 } from '@nestjs/common';
 import path from 'path';
@@ -140,28 +138,36 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
+      // pull docker
+      await this.sshProvider.pullDocker(
+        {
+          sshLink: sshConnectionString,
+          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+        },
+        nameRemoteRepository,
+      );
       // pull mini back from github repo
-      await this.sshProvider.pullMiniBack(
-        {
-          sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
-        },
-        nameRemoteRepository,
-        gitProjectLink,
-      );
+      // await this.sshProvider.pullMiniBack(
+      //   {
+      //     sshLink: sshConnectionString,
+      //     pathToSSHPrivateKey: sshServerPrivateKeyPath,
+      //   },
+      //   nameRemoteRepository,
+      //   gitProjectLink,
+      // );
 
-      await this.sshProvider.runMiniBack(
-        {
-          sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
-        },
-        nameRemoteRepository,
-      );
+      // await this.sshProvider.runMiniBack(
+      //   {
+      //     sshLink: sshConnectionString,
+      //     pathToSSHPrivateKey: sshServerPrivateKeyPath,
+      //   },
+      //   nameRemoteRepository,
+      // );
 
-      await this.miniBackRepository.update(
-        { id: currentMiniBack.id },
-        { deployState: ProjectState.DEPLOYED },
-      );
+      // await this.miniBackRepository.update(
+      //   { id: currentMiniBack.id },
+      //   { deployState: ProjectState.DEPLOYED },
+      // );
     } catch (error: any) {
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },

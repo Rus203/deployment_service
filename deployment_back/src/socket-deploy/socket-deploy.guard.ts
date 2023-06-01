@@ -14,7 +14,6 @@ export class AuthGuard implements CanActivate {
       client.data.payload = this.jwtService.verify(
         client.handshake.query?.token,
       );
-      console.log(client);
 
       return true;
     } catch (e) {
