@@ -28,6 +28,9 @@ export class SocketDeployGateway {
   ) {
     this.miniBackService
       .placeMiniBake({ ...dto, userId: client.data.payload.id })
+      .then(() => {
+        this.server.emit('finish-deploy');
+      })
       .catch((error) => {
         this.server.emit('error', error.message);
       });
@@ -36,18 +39,18 @@ export class SocketDeployGateway {
   @UseGuards(AuthGuard)
   @SubscribeMessage('delete-project')
   async deleteMiniback(
-    @MessageBody() data: string,
+    @MessageBody() dto: GetMiniBackDto,
     @ConnectedSocket() client: Socket,
   ) {
-    const dto = plainToClass(GetMiniBackDto, JSON.parse(data));
-    await validate(dto).catch((errors) => {
-      this.server.emit('error', {
-        error: errors.map((error) => error.toString()),
+    console.log('start deleting');
+    this.miniBackService
+      .delete({ ...dto, userId: client.data.payload.id })
+      .then(() => {
+        this.server.emit('finish-delete');
+      })
+      .catch((error) => {
+        console.log(error);
+        this.server.emit('error', error.message);
       });
-    });
-
-    this.miniBackService.delete(dto).catch((error) => {
-      this.server.emit('error', error.message);
-    });
   }
 }

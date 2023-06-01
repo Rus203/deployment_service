@@ -82,12 +82,16 @@ export class MiniBackService implements OnApplicationBootstrap {
     } catch (error) {
       throw error;
     } finally {
+      await this.miniBackRepository.delete({ id: dto.id }).catch((error) => {
+        console.log(error);
+      });
+
+      console.log('deleting');
       await fs
         .unlink(currentMiniBack.sshServerPrivateKeyPath)
         .catch((error) => {
           console.log(error);
         });
-      await this.miniBackRepository.delete(dto);
     }
   }
 
@@ -127,6 +131,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
     sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
 
+    console.log('start process');
     try {
       // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
@@ -146,28 +151,29 @@ export class MiniBackService implements OnApplicationBootstrap {
         },
         nameRemoteRepository,
       );
+
       // pull mini back from github repo
-      // await this.sshProvider.pullMiniBack(
-      //   {
-      //     sshLink: sshConnectionString,
-      //     pathToSSHPrivateKey: sshServerPrivateKeyPath,
-      //   },
-      //   nameRemoteRepository,
-      //   gitProjectLink,
-      // );
+      await this.sshProvider.pullMiniBack(
+        {
+          sshLink: sshConnectionString,
+          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+        },
+        nameRemoteRepository,
+        gitProjectLink,
+      );
 
-      // await this.sshProvider.runMiniBack(
-      //   {
-      //     sshLink: sshConnectionString,
-      //     pathToSSHPrivateKey: sshServerPrivateKeyPath,
-      //   },
-      //   nameRemoteRepository,
-      // );
+      await this.sshProvider.runMiniBack(
+        {
+          sshLink: sshConnectionString,
+          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+        },
+        nameRemoteRepository,
+      );
 
-      // await this.miniBackRepository.update(
-      //   { id: currentMiniBack.id },
-      //   { deployState: ProjectState.DEPLOYED },
-      // );
+      await this.miniBackRepository.update(
+        { id: currentMiniBack.id },
+        { deployState: ProjectState.DEPLOYED },
+      );
     } catch (error: any) {
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
