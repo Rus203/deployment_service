@@ -39,12 +39,22 @@ export class MiniBackService implements OnApplicationBootstrap {
     });
   }
 
+  // returns info without data of mini back files (private key, name of a repo and port)
   async getAll(userId: string) {
-    return await this.miniBackRepository.find({ where: { userId } });
+    const miniBackCollection = await this.miniBackRepository.find({
+      where: { userId },
+    });
+    return miniBackCollection.map((instance) => {
+      const { sshServerPrivateKeyPath, nameRemoteRepository, port, ...rest } =
+        instance;
+      return rest;
+    });
   }
 
-  async getOne(dto: GetMiniBackDto & { serverUrl?: string }) {
-    return this.miniBackRepository.findOne({ where: dto });
+  async getOne(dto: GetMiniBackDto) {
+    return this.miniBackRepository.findOne({
+      where: dto,
+    });
   }
 
   async create(
@@ -54,20 +64,28 @@ export class MiniBackService implements OnApplicationBootstrap {
     },
   ) {
     const serverUrl = dto.sshConnectionString.split('@')[1];
-    const candidate = await this.getOne({ userId: dto.userId, serverUrl });
+    const candidate = await this.getOne({
+      userId: dto.userId,
+      serverUrl,
+      sshConnectionString: dto.sshConnectionString,
+    });
+    const port = Number(process.env.MINI_BACK_PORT);
 
     if (candidate !== null) {
       throw new BadRequestException('This server is already busy');
     }
 
-    dto.port = Number(process.env.MINI_BACK_PORT);
     dto.name = normalizeProjectName(dto.name);
     await this.fileEncryptorProvider.encryptFilesOnPlace([
       dto.sshServerPrivateKeyPath,
     ]);
 
     dto.sshServerPrivateKeyPath = dto.sshServerPrivateKeyPath + '.enc';
-    const instance = this.miniBackRepository.create({ ...dto, serverUrl });
+    const instance = this.miniBackRepository.create({
+      ...dto,
+      port,
+      serverUrl,
+    });
     const nameRemoteRepository = process.env.REMOTE_REPOSITORY;
     return this.miniBackRepository.save({ ...instance, nameRemoteRepository });
   }
@@ -85,27 +103,19 @@ export class MiniBackService implements OnApplicationBootstrap {
     } catch (error) {
       throw error;
     } finally {
-      await this.miniBackRepository.delete({ id: dto.id }).catch((error) => {
-        console.log(error);
-      });
-
-      await fs
-        .unlink(currentMiniBack.sshServerPrivateKeyPath)
-        .catch((error) => {
-          console.log(error);
-        });
+      await this.miniBackRepository.delete({ id: dto.id });
+      await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
     }
   }
 
   async placeMiniBake(dto: GetMiniBackDto) {
-    this.socket.emitDeployStatus(IDeployStatus.START);
     const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new Error('Nof found the instance of mini back');
     }
 
     const deployState = currentMiniBack.deployState;
-    if (deployState === ProjectState.DEPLOYED) {
+    if (deployState !== ProjectState.UNDEPLOYED) {
       throw new Error(
         'This instance of mini_back has already either developed or failed via you are not able to do it',
       );
@@ -134,8 +144,8 @@ export class MiniBackService implements OnApplicationBootstrap {
     miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
     sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
 
-    this.socket.emitDeployStatus(IDeployStatus.PREPARING);
     try {
+      this.socket.emitDeployStatus(IDeployStatus.START);
       // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
         {
@@ -193,6 +203,10 @@ export class MiniBackService implements OnApplicationBootstrap {
         { deployState: ProjectState.FAILED },
       );
 
+      if (typeof error === 'string') {
+        throw new Error(error);
+      }
+
       throw error;
     } finally {
       await this.fileEncryptorProvider.encryptFilesOnPlace(
@@ -214,6 +228,7 @@ export class MiniBackService implements OnApplicationBootstrap {
       await this.fileEncryptorProvider.decryptFilesOnPlace([
         sshServerPrivateKeyPath,
       ]);
+
       sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
 
       this.socket.emitDeleteStatus(IDeleteStatus.PREPARING);
