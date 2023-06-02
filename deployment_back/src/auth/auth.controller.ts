@@ -36,9 +36,6 @@ export class AuthController {
     return this.authService.signIn(dto);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'bad request' })
   @ApiInternalServerErrorResponse({ description: 'Server error' })
   @Post('refresh')
