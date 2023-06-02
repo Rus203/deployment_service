@@ -1,7 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, MaxLength } from 'class-validator';
+import { MiniBack } from '../mini-back.entity';
 
-export class CreateMiniBackDto {
+export class CreateMiniBackDto extends PartialType(MiniBack) {
   @ApiProperty()
   @IsNotEmpty()
   @MaxLength(50)
