@@ -1,8 +1,29 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateMiniBackDto } from './create-mini-back.dto';
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsUUID, IsOptional, MaxLength } from 'class-validator';
 
-export class GetMiniBackDto extends PartialType(CreateMiniBackDto) {
+export class GetMiniBackDto {
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
+  @IsOptional()
+  @MaxLength(50)
+  name?: string;
+
+  @IsOptional()
+  @MaxLength(255)
+  sshServerPrivateKeyPath?: string;
+
+  @IsOptional()
+  @MaxLength(2047)
+  sshConnectionString?: string;
+
+  @IsOptional()
+  @MaxLength(2047)
+  serverUrl?: string;
+
+  @IsOptional()
+  nameRemoteRepository?: string;
+
   @IsNotEmpty()
   @IsUUID()
   userId: string;
