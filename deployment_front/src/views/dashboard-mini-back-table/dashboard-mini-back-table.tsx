@@ -13,14 +13,18 @@ import { IMiniBack } from '../../interface/miniback.interface'
 import { MiniBackState } from '../../utils/mini-back-state.enum'
 import TableItem from './table-item/table-item.component'
 import { Container, FixedTable, LinkToDeploy } from './table.styles'
+import { useAppDispatch } from '../../store/hooks'
+import { addMiniBackCollection } from '../../store/Slices'
 
 const DashBoardMiniBackTable: FC = () => {
   const [miniBackCollection, setMiniBackCollection] = useState<IMiniBack[]>([])
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     axios.get('mini-back')
       .then(res => {
         setMiniBackCollection(res.data)
+        dispatch(addMiniBackCollection(res.data))
       })
       .catch(error => {
         console.log(error)

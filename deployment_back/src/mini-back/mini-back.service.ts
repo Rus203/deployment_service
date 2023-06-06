@@ -39,14 +39,18 @@ export class MiniBackService implements OnApplicationBootstrap {
     });
   }
 
-  // returns info without data of mini back files (private key, name of a repo and port)
+  // returns info without data of mini back files (private key, name of a repo and ssh connection string
   async getAll(userId: string) {
     const miniBackCollection = await this.miniBackRepository.find({
       where: { userId },
     });
     return miniBackCollection.map((instance) => {
-      const { sshServerPrivateKeyPath, nameRemoteRepository, port, ...rest } =
-        instance;
+      const {
+        sshServerPrivateKeyPath,
+        nameRemoteRepository,
+        sshConnectionString,
+        ...rest
+      } = instance;
       return rest;
     });
   }

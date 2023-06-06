@@ -10,6 +10,7 @@ import { useAppSelector } from '../../store/hooks';
 const Diagrams: FC = () => {
   const miniBackCollection = useAppSelector(state => state.miniBack.miniBackCollection)
 
+  console.log('mini ', miniBackCollection)
   return (
     <Wrapper>
       { miniBackCollection.filter(m => m.deployState === MiniBackState.DEPLOYED).length === 0 && <h1>No running servers</h1> }

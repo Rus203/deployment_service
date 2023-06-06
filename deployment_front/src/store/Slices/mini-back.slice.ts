@@ -17,8 +17,8 @@ const miniBackSlice = createSlice({
         state.miniBackCollection = action.payload
       },
 
-      addMiniBackItem: (state, action: PayloadAction<IMiniBack>) => {
-        state.miniBackCollection = [...state.miniBackCollection, action.payload]
+      addMiniBackCollection: (state, action: PayloadAction<IMiniBack[]>) => {
+        state.miniBackCollection = action.payload
       },
   
       deleteMiniBackItem: (state, action: PayloadAction<{ id: string }>) => {
@@ -29,7 +29,7 @@ const miniBackSlice = createSlice({
     },
   });
   
-  export const { setMiniBackCollection, deleteMiniBackItem, addMiniBackItem } = miniBackSlice.actions;
+  export const { setMiniBackCollection, deleteMiniBackItem, addMiniBackCollection } = miniBackSlice.actions;
   
   export default miniBackSlice.reducer;
   
