@@ -1,9 +1,9 @@
 export enum DeployStatusMiniBack {
   START = 0,
-  PUT_DIRECTORY = 0.25,
-  PULL_MINIBACK = 0.5,
-  RUN_MINIBACK = 0.75,
-  FINISH = 1,
+  PUT_DIRECTORY = 25,
+  PULL_MINIBACK = 50,
+  RUN_MINIBACK = 75,
+  FINISH = 100,
 }
 
 export enum DeleteStatusMiniBack {

@@ -21,7 +21,7 @@ export class SocketDeployGateway {
   @WebSocketServer() server: Server;
 
   @UseGuards(AuthGuard)
-  @SubscribeMessage('deploy-project')
+  @SubscribeMessage('deploy-miniback')
   async runDeploy(
     @MessageBody() dto: GetMiniBackDto,
     @ConnectedSocket() client: Socket,
@@ -37,7 +37,7 @@ export class SocketDeployGateway {
   }
 
   @UseGuards(AuthGuard)
-  @SubscribeMessage('delete-project')
+  @SubscribeMessage('delete-miniback')
   async deleteMiniback(
     @MessageBody() dto: GetMiniBackDto,
     @ConnectedSocket() client: Socket,
@@ -47,6 +47,7 @@ export class SocketDeployGateway {
       .delete({ ...dto, userId: client.data.payload.id })
       .then(() => {
         this.server.emit('finish-delete');
+        console.log('finish-delete');
       })
       .catch((error) => {
         console.log(error);

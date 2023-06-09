@@ -13,11 +13,11 @@ import { IMiniBack } from '../../interface/miniback.interface'
 import { MiniBackState } from '../../utils/mini-back-state.enum'
 import TableItem from './table-item/table-item.component'
 import { Container, FixedTable, LinkToDeploy } from './table.styles'
-import { useAppDispatch } from '../../store/hooks'
-import { addMiniBackCollection } from '../../store/Slices'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { addMiniBackCollection, setMiniBackCollection } from '../../store/Slices'
 
 const DashBoardMiniBackTable: FC = () => {
-  const [miniBackCollection, setMiniBackCollection] = useState<IMiniBack[]>([])
+  const { miniBackCollection } = useAppSelector(state => state.miniBack)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
