@@ -5,12 +5,11 @@ import {
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Injectable, UseGuards } from '@nestjs/common';
 import { MiniBackService } from 'src/mini-back/mini-back.service';
 import { GetMiniBackDto } from 'src/mini-back/dto/get-mini-back.dto';
 import { AuthGuard } from './socket-deploy.guard';
-import { Socket } from 'socket.io';
 
 // find out how to use only one instance if socket io
 

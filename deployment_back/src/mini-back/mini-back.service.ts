@@ -194,7 +194,7 @@ export class MiniBackService implements OnApplicationBootstrap {
 
       this.socket.emitDeployStatus(IDeployStatus.PULL_MINIBACK);
 
-      console.log('pull');
+      console.log('run');
 
       await this.sshProvider.runMiniBack(
         {
