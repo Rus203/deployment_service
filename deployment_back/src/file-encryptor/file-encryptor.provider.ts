@@ -20,7 +20,7 @@ import { pipeline } from 'node:stream';
 @Injectable()
 export class FileEncryptorProvider implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
-    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-configs');
+    const commonFolder = path.join(__dirname, '..', '..', 'mini-back-key');
     const miniBackPrivateKey = path.join(commonFolder, 'id_rsa');
 
     if (existsSync(miniBackPrivateKey)) {

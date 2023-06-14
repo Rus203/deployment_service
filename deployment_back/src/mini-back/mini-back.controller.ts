@@ -91,7 +91,6 @@ export class MiniBackController {
     @UploadedFiles()
     { sshServerPrivateKey }: { sshServerPrivateKey?: Express.Multer.File[] },
   ) {
-    console.log(dto);
     const sshServerPrivateKeyPath = sshServerPrivateKey[0].path;
     const userId = req.user.id;
     return await this.miniBackService.create({

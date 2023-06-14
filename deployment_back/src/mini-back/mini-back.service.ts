@@ -1,9 +1,9 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   OnApplicationBootstrap,
 } from '@nestjs/common';
-import path from 'path';
+import { join } from 'path';
 import { FileEncryptorProvider } from '../file-encryptor/file-encryptor.provider';
 import { SshProvider } from '../ssh/ssh.provider';
 import fs from 'fs/promises';
@@ -13,13 +13,14 @@ import { Repository } from 'typeorm';
 import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { normalizeProjectName } from 'src/utils';
-import { IDeleteStatus, IDeployStatus, ProjectState } from '../enums';
+import { DeleteStatus, DeployStatus, ProjectState } from '../enums';
 import { chmodSync } from 'fs';
 import { ProgressGateway } from 'src/socket-progress/progress.gateway';
+import { makeCopyFile } from '../utils/make-copy-file';
 
 @Injectable()
 export class MiniBackService implements OnApplicationBootstrap {
-  rootDirectory = path.join(__dirname, '..', '..');
+  rootDirectory = join(__dirname, '..', '..');
   constructor(
     private sshProvider: SshProvider,
     private fileEncryptorProvider: FileEncryptorProvider,
@@ -29,12 +30,12 @@ export class MiniBackService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    const commonPath = path.join(this.rootDirectory, 'mini-back-configs');
+    const commonPath = join(this.rootDirectory, 'mini-back-configs');
     const files = await fs.readdir(commonPath);
 
     files.forEach((file) => {
       if (file.endsWith('.sh')) {
-        chmodSync(path.join(commonPath, file), 0o601);
+        chmodSync(join(commonPath, file), 0o601);
       }
     });
   }
@@ -76,7 +77,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     const port = Number(process.env.MINI_BACK_PORT);
 
     if (candidate !== null) {
-      throw new BadRequestException('This server is already busy');
+      throw new ConflictException('This server is already busy');
     }
 
     dto.name = normalizeProjectName(dto.name);
@@ -90,12 +91,16 @@ export class MiniBackService implements OnApplicationBootstrap {
       port,
       serverUrl,
     });
-    const nameRemoteRepository = process.env.REMOTE_REPOSITORY;
-    return this.miniBackRepository.save({ ...instance, nameRemoteRepository });
+    const { sshServerPrivateKeyPath, nameRemoteRepository, ...rest } =
+      await this.miniBackRepository.save({
+        ...instance,
+        nameRemoteRepository: process.env.REMOTE_REPOSITORY,
+      });
+    return rest;
   }
 
   async delete(dto: GetMiniBackDto) {
-    this.socket.emitDeleteStatus(IDeleteStatus.START);
+    this.socket.emitDeleteStatus(DeleteStatus.START);
     const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new Error('The instance of mini back not found');
@@ -109,12 +114,15 @@ export class MiniBackService implements OnApplicationBootstrap {
       throw error;
     } finally {
       await this.miniBackRepository.delete({ id: dto.id });
-      await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
-      this.socket.emitDeleteStatus(IDeleteStatus.FINISH);
+      if (fs.access(currentMiniBack.sshServerPrivateKeyPath)) {
+        await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
+      }
+      this.socket.emitDeleteStatus(DeleteStatus.FINISH);
     }
   }
 
   async placeMiniBake(dto: GetMiniBackDto) {
+    this.socket.emitDeployStatus(DeployStatus.START);
     const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new Error('Nof found the instance of mini back');
@@ -132,9 +140,9 @@ export class MiniBackService implements OnApplicationBootstrap {
       currentMiniBack;
     const gitProjectLink = process.env.GIT_MINI_BACK_LINK;
 
-    let miniBackPrivateKey = path.join(
+    const miniBackPrivateKey = join(
       this.rootDirectory,
-      'mini-back-configs',
+      'mini-back-key',
       'id_rsa.enc',
     );
 
@@ -142,80 +150,87 @@ export class MiniBackService implements OnApplicationBootstrap {
       throw new Error("Secret key of mini back wasn't provided");
     }
 
-    console.log('Encrypting files before deployment');
+    let tempMiniBackPrivateKeyPath = await makeCopyFile(miniBackPrivateKey);
+    let tempSshFilePrivateKeyPath = await makeCopyFile(sshServerPrivateKeyPath);
+
     await this.fileEncryptorProvider.decryptFilesOnPlace([
-      miniBackPrivateKey,
-      sshServerPrivateKeyPath,
+      tempMiniBackPrivateKeyPath,
+      tempSshFilePrivateKeyPath,
     ]);
 
-    console.log('Encrypting files after deployment');
-    miniBackPrivateKey = miniBackPrivateKey.replace(/.enc$/, '');
-    sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
+    tempSshFilePrivateKeyPath = tempSshFilePrivateKeyPath.replace(/.enc$/, '');
+    tempMiniBackPrivateKeyPath = tempMiniBackPrivateKeyPath.replace(
+      /.enc$/,
+      '',
+    );
 
+    chmodSync(tempMiniBackPrivateKeyPath, 0o600);
+
+    this.socket.emitDeployStatus(DeployStatus.PREPARING);
     try {
-      console.log('start');
-      this.socket.emitDeployStatus(IDeployStatus.START);
       // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
         {
           sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
         },
-        path.join(this.rootDirectory, 'mini-back-configs'),
+        join(this.rootDirectory, 'mini-back-configs'),
         nameRemoteRepository,
       );
 
-      console.log('place everything');
+      this.socket.emitDeployStatus(DeployStatus.PUT_DIRECTORY);
 
-      this.socket.emitDeployStatus(IDeployStatus.PUT_DIRECTORY);
+      await this.sshProvider.putFileInDir(
+        {
+          sshLink: sshConnectionString,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
+        },
+        tempMiniBackPrivateKeyPath,
+        join(`${nameRemoteRepository}`, 'id_rsa'),
+      );
+
+      this.socket.emitDeployStatus(DeployStatus.PUT_KEY);
 
       // pull docker
       await this.sshProvider.pullDocker(
         {
           sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
         },
         nameRemoteRepository,
       );
 
-      this.socket.emitDeployStatus(IDeployStatus.PULL_DOCKER);
-
-      console.log('pull');
+      this.socket.emitDeployStatus(DeployStatus.PULL_DOCKER);
 
       // pull mini back from github repo
       await this.sshProvider.pullMiniBack(
         {
           sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
         },
         nameRemoteRepository,
         gitProjectLink,
       );
 
-      this.socket.emitDeployStatus(IDeployStatus.PULL_MINIBACK);
-
-      console.log('run');
+      this.socket.emitDeployStatus(DeployStatus.PULL_MINIBACK);
 
       await this.sshProvider.runMiniBack(
         {
           sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
         },
         nameRemoteRepository,
       );
 
-      this.socket.emitDeployStatus(IDeployStatus.RUN_MINIBACK);
-
-      console.log('run');
+      this.socket.emitDeployStatus(DeployStatus.RUN_MINIBACK);
 
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
         { deployState: ProjectState.DEPLOYED },
       );
 
-      this.socket.emitDeployStatus(IDeployStatus.UPDATE_STATUS);
+      this.socket.emitDeployStatus(DeployStatus.UPDATE_STATUS);
     } catch (error: any) {
-      console.log('Break down by place mini back with the error: ', error);
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
         { deployState: ProjectState.FAILED },
@@ -227,16 +242,15 @@ export class MiniBackService implements OnApplicationBootstrap {
 
       throw error;
     } finally {
-      console.log('start encrypting');
       await this.fileEncryptorProvider.encryptFilesOnPlace(
-        [miniBackPrivateKey, sshServerPrivateKeyPath].map((path) =>
-          path.replace(/.enc$/, ''),
-        ),
+        tempSshFilePrivateKeyPath,
       );
 
-      console.log('finish encrypting');
+      if (fs.access(tempMiniBackPrivateKeyPath)) {
+        await fs.unlink(tempMiniBackPrivateKeyPath);
+      }
 
-      this.socket.emitDeployStatus(IDeployStatus.FINISH);
+      this.socket.emitDeployStatus(DeployStatus.FINISH);
     }
   }
 
@@ -244,33 +258,36 @@ export class MiniBackService implements OnApplicationBootstrap {
     // eslint-disable-next-line prefer-const
     let { sshServerPrivateKeyPath, sshConnectionString, nameRemoteRepository } =
       currentMiniBack;
+
+    let tempSshFilePrivateKeyPath = await makeCopyFile(sshServerPrivateKeyPath);
+
     try {
       await this.fileEncryptorProvider.decryptFilesOnPlace([
-        sshServerPrivateKeyPath,
+        tempSshFilePrivateKeyPath,
       ]);
 
-      sshServerPrivateKeyPath = sshServerPrivateKeyPath.replace(/.enc$/, '');
+      tempSshFilePrivateKeyPath = tempSshFilePrivateKeyPath.replace(
+        /.enc$/,
+        '',
+      );
 
-      this.socket.emitDeleteStatus(IDeleteStatus.PREPARING);
+      this.socket.emitDeleteStatus(DeleteStatus.PREPARING);
 
       await this.sshProvider.deleteMiniBack(
         {
           sshLink: sshConnectionString,
-          pathToSSHPrivateKey: sshServerPrivateKeyPath,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
         },
         nameRemoteRepository,
       );
 
-      this.socket.emitDeleteStatus(IDeleteStatus.DELETING);
+      this.socket.emitDeleteStatus(DeleteStatus.DELETING);
     } catch (error: any) {
-      console.log('Break down by delete mini back from server');
       throw error;
     } finally {
-      console.log('start encrypting after delete mini-back from server');
-      await this.fileEncryptorProvider.encryptFilesOnPlace(
-        sshServerPrivateKeyPath.replace(/.enc$/, ''),
-      );
-      console.log('finish encrypting after delete mini-back from server');
+      if (fs.access(tempSshFilePrivateKeyPath)) {
+        await fs.unlink(tempSshFilePrivateKeyPath);
+      }
     }
   }
 }

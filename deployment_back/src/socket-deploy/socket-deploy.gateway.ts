@@ -41,15 +41,12 @@ export class SocketDeployGateway {
     @MessageBody() dto: GetMiniBackDto,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('start deleting');
     this.miniBackService
       .delete({ ...dto, userId: client.data.payload.id })
       .then(() => {
         this.server.emit('finish-delete');
-        console.log('finish-delete');
       })
       .catch((error) => {
-        console.log(error);
         this.server.emit('error', error.message);
       });
   }

@@ -1,16 +1,16 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { IDeleteStatus, IDeployStatus } from 'src/enums';
+import { DeleteStatus, DeployStatus } from 'src/enums';
 
 @WebSocketGateway({ cors: '*' })
 export class ProgressGateway {
   @WebSocketServer() server: Server;
 
-  emitDeployStatus(status: IDeployStatus) {
+  emitDeployStatus(status: DeployStatus) {
     this.server.emit('progress-deploy-mini-back', status);
   }
 
-  emitDeleteStatus(status: IDeleteStatus) {
+  emitDeleteStatus(status: DeleteStatus) {
     this.server.emit('progress-delete-mini-back', status);
   }
 }

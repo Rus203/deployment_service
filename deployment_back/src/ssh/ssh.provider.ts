@@ -154,4 +154,34 @@ export class SshProvider extends ChildProcessCommandProvider {
       this.handleProcessErrors(childProcess, resolve, reject);
     });
   }
+
+  putFileInDir(
+    { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    localFilePath: string,
+    remoteFilePath: string,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const childProcess = spawn('scp', [
+        '-i',
+        pathToSSHPrivateKey,
+        '-o StrictHostKeyChecking=no',
+        localFilePath,
+        `${sshLink}:${remoteFilePath}`,
+      ]);
+
+      childProcess.on('error', (error) => {
+        reject(error);
+      });
+
+      childProcess.on('exit', (code) => {
+        if (code === 0) {
+          resolve(true);
+        } else {
+          reject(new Error(`SCP process exited with code ${code}`));
+        }
+      });
+
+      this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
 }
