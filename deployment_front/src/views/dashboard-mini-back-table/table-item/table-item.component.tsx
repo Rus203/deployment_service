@@ -1,14 +1,18 @@
 import { Button, TableCell, TableRow } from '@mui/material';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
-import Spinner from '../../../Components/Spinner';
 import { IMiniBack } from '../../../interface/miniback.interface';
 import { MiniBackState } from '../../../utils/mini-back-state.enum';
 import io, { Socket } from 'socket.io-client'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { deleteMiniBackItem, setMiniBackStatus } from '../../../store/Slices';
-import CircularStatic from '../../../Components/CircularProgressWithLabel/circular-progress-with-label.component';
-import { DeployStatusMiniBack } from '../../../utils/server-status.enum';
 import Alert from '../../../Components/Alert';
+import {
+  deleteMiniBackItem,
+  rejectMiniBackLoading,
+  setMiniBackLoading,
+  setMiniBackStatus,
+  successMiniBackLoading
+} from '../../../store/Slices/mini-back.slice';
+import CircularStatic from '../../../Components/CircularProgressWithLabel/circular-progress-with-label.component';
 
 type Props = {
   row: IMiniBack,
@@ -17,12 +21,12 @@ type Props = {
 }
 
 const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
-  const [loading, setLoading] = useState<boolean>(false)
   const [loadingAmount, setLoadingAmount] = useState<number>(0)
+  const [socket, setSocket] = useState<Socket>()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [isShowAlert, setIsShowAlert] = useState<boolean>(false)
-  const [socket, setSocket] = useState<Socket>()
   const account = useAppSelector(state => state.auth.account)
+  const loading = useAppSelector(state => state.miniBack.miniBackCollection).find(el => el.id === row.id)?.isLoading
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -31,37 +35,37 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
         ? process.env.REACT_APP_SOCKET_BACK_DEPLOYMENT_URL!
         : process.env.REACT_APP_SOCKET_BACK_DEV_URL!
 
-      console.log(url + `?token=${account.accessToken}`)
       const socketInstance = io(url + `?token=${account.accessToken}`)
       setSocket(socketInstance)
 
-      socketInstance?.on('error', data => {
+      socketInstance?.on(`error-${row.id}`, data => {
         console.log('errors ', data)
         setIsShowAlert(true)
         setErrorMessage(data)
         dispatch(setMiniBackStatus({ id: row.id, status: MiniBackState.FAILED }))
-        setLoading(false)
+        dispatch(rejectMiniBackLoading({ id: row.id }))
       })
 
-      socketInstance?.on('progress-deploy-mini-back', data => {
+      socketInstance?.on(`progress-deploy-mini-back-${row.id}`, data => {
         console.log(data)
         setLoadingAmount(data)
       })
 
-      socketInstance?.on('progress-deploy-mini-back', data => {
+      socketInstance?.on(`progress-delete-mini-back-${row.id}`, data => {
         console.log(data)
+        dispatch(setMiniBackLoading({ id: row.id }))
         setLoadingAmount(data)
       })
 
-      socketInstance?.on('finish-delete', data => {
+      socketInstance?.on(`finish-delete-mini-back${row.id}`, data => {
         console.log("finish-delete")
-        setLoading(false)
+        dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(deleteMiniBackItem({ id: row.id }))
       })
 
-      socketInstance?.on('finish-deploy', data => {
+      socketInstance?.on(`finish-deploy-mini-back${row.id}`, data => {
         console.log('finish-deploy')
-        setLoading(false)
+        dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(setMiniBackStatus({ id: row.id, status: MiniBackState.DEPLOYED }))
       })
 
@@ -69,17 +73,26 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
     }
   }, [])
 
+  useEffect(() => {
+    if (isShowAlert) {
+      const timerId = setTimeout(() => setIsShowAlert(false), 10000);
+      return () => clearTimeout(timerId);
+    }
+  }, [isShowAlert])
+
+
+
   const handleDelete = (event: SyntheticEvent) => {
     event.stopPropagation()
-    console.log("first")
-    setLoading(true)
+    console.log('delete-miniback')
+    dispatch(setMiniBackLoading({ id: row.id }))
     socket?.emit('delete-miniback', { id: row.id })
   }
 
   const handleDeploy = (event: SyntheticEvent) => {
     event.stopPropagation()
-    setLoading(true)
-    socket?.emit('deploy-miniback', { id: row.id })
+    dispatch(setMiniBackLoading({ id: row.id }))
+    socket?.emit(`deploy-miniback`, { id: row.id })
   }
 
   useEffect(() => {
@@ -97,7 +110,7 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       onClick={() => followToProjects(row.id)}
       sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
     >
-      <TableCell>{index + 1}</TableCell>
+      <TableCell>{index}</TableCell>
       <TableCell>{row.name}</TableCell>
       <TableCell>{row.serverUrl}</TableCell>
       <TableCell>{row.port}</TableCell>
@@ -126,13 +139,12 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
           </>
         }
       </TableCell>
-      {/* {(errorMessage !== null && isShowAlert)
+      {(errorMessage !== null && isShowAlert)
         ?
         <TableCell><Alert error={errorMessage} /></TableCell>
         : null
-      } */}
+      }
     </TableRow>
-
   );
 }
 

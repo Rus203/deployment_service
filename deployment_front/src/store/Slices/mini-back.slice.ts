@@ -2,8 +2,14 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { IMiniBack } from "../../interface/miniback.interface";
 import { MiniBackState } from "../../utils/mini-back-state.enum";
 
+interface IMinibackLoader extends IMiniBack {
+  error: boolean;
+  success: boolean;
+  isLoading: boolean;
+}
+
 interface IInitialState {
-  miniBackCollection: IMiniBack[];
+  miniBackCollection: IMinibackLoader[];
 }
 
 const initialState: IInitialState = {
@@ -15,31 +21,76 @@ const miniBackSlice = createSlice({
   initialState,
   reducers: {
     setMiniBackCollection: (state, action: PayloadAction<IMiniBack[]>) => {
-      state.miniBackCollection = action.payload;
-    },
-
-    addMiniBackCollection: (state, action: PayloadAction<IMiniBack[]>) => {
-      state.miniBackCollection = action.payload;
+      state.miniBackCollection = action.payload.map((el) => {
+        return {
+          ...el,
+          error: false,
+          success: false,
+          isLoading: false,
+        }
+      });
     },
 
     deleteMiniBackItem: (state, action: PayloadAction<{ id: string }>) => {
+      console.log(action.payload.id);
       state.miniBackCollection = state.miniBackCollection.filter(
         (item) => item.id !== action.payload.id
       );
     },
+
     setMiniBackStatus: (
       state,
       action: PayloadAction<{ id: string; status: MiniBackState }>
     ) => {
-      const item = state.miniBackCollection.find(
-        (el) => el.id === action.payload.id
-      );
+      state.miniBackCollection = state.miniBackCollection.map((value) => {
+        if (value.id === action.payload.id) {
+          return {
+            ...value,
+            deployState: action.payload.status,
+          };
+        }
+        return value;
+      });
+    },
 
-      if (item) {
-        item.deployState = action.payload.status;
-      }
+    setMiniBackLoading: (state, action: PayloadAction<{ id: string }>) => {
+      console.log(action.payload.id);
+      state.miniBackCollection = state.miniBackCollection.map((value) => {
+        if (value.id === action.payload.id) {
+          return {
+            ...value,
+            isLoading: true,
+          };
+        }
+        return value;
+      });
+    },
 
-      return state;
+    successMiniBackLoading: (state, action: PayloadAction<{ id: string }>) => {
+      console.log(action.payload.id);
+      state.miniBackCollection = state.miniBackCollection.map((value) => {
+        if (value.id === action.payload.id) {
+          return {
+            ...value,
+            success: true,
+            isLoading: false,
+          };
+        }
+        return value;
+      });
+    },
+
+    rejectMiniBackLoading: (state, action: PayloadAction<{ id: string }>) => {
+      state.miniBackCollection = state.miniBackCollection.map((value) => {
+        if (value.id === action.payload.id) {
+          return {
+            ...value,
+            error: true,
+            isLoading: false,
+          };
+        }
+        return value;
+      });
     },
   },
 });
@@ -47,8 +98,10 @@ const miniBackSlice = createSlice({
 export const {
   setMiniBackCollection,
   deleteMiniBackItem,
-  addMiniBackCollection,
   setMiniBackStatus,
+  rejectMiniBackLoading,
+  setMiniBackLoading,
+  successMiniBackLoading,
 } = miniBackSlice.actions;
 
 export default miniBackSlice.reducer;

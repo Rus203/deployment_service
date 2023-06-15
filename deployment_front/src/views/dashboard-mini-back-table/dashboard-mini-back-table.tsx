@@ -14,7 +14,7 @@ import { MiniBackState } from '../../utils/mini-back-state.enum'
 import TableItem from './table-item/table-item.component'
 import { Container, FixedTable, LinkToDeploy } from './table.styles'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { addMiniBackCollection, setMiniBackCollection } from '../../store/Slices'
+import { setMiniBackCollection } from '../../store/Slices'
 
 const DashBoardMiniBackTable: FC = () => {
   const { miniBackCollection } = useAppSelector(state => state.miniBack)
@@ -24,7 +24,7 @@ const DashBoardMiniBackTable: FC = () => {
     axios.get('mini-back')
       .then(res => {
         setMiniBackCollection(res.data)
-        dispatch(addMiniBackCollection(res.data))
+        dispatch(setMiniBackCollection(res.data))
       })
       .catch(error => {
         console.log(error)
@@ -59,7 +59,12 @@ const DashBoardMiniBackTable: FC = () => {
               <TableBody>
                 {
                   miniBackCollection.map((row: IMiniBack, index) => (
-                    <TableItem key={index} index={index} row={row} followToProjects={handleFollowToProjects} />
+                    <TableItem
+                      key={index}
+                      index={index}
+                      row={row}
+                      followToProjects={handleFollowToProjects}
+                    />
                   )
                   )}
               </TableBody>

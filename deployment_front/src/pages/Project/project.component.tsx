@@ -2,7 +2,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector } from "../../store/hooks";
@@ -19,11 +19,12 @@ import {
   SectionInputs,
   SelectProjectsContainer,
 } from "./project.styles";
+import axios from 'axios'
+import Spinner from "../../Components/Spinner";
 
 interface IProject {
   name: string,
   email: string,
-  port: number,
   gitLink: string,
   envFile: FileList,
   sshGitPrivateKey: FileList
@@ -33,29 +34,51 @@ export const Project: FC = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IProject>({
     mode: 'onChange'
   });
-  // const { email } = useAppSelector(state => state.auth)
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const email: string | undefined = useAppSelector(state => state.auth.account?.email)
   const navigate = useNavigate()
   const location = useLocation()
   const miniBackId = location.pathname.split('/')[2]
+  const miniBack = useAppSelector(state => state.miniBack.miniBackCollection)
+    .find(item => item.id === miniBackId)
+  
 
   const envFile = watch('envFile');
   const sshGitPrivateKey = watch('sshGitPrivateKey')
 
   const onSubmit = async (data: IProject) => {
-    const formData = new FormData()
-    formData.append('name', data.name)
-    formData.append('email', data.email)
-    formData.append('port', data.port.toString())
-    formData.append('gitLink', data.gitLink)
-    formData.append('envFile', data.envFile[0])
-    formData.append('sshGitPrivateKey', data.sshGitPrivateKey[0])
+    if (miniBack) {
+      const formData = new FormData()
+      formData.append('name', data.name)
+      formData.append('email', data.email)
+      formData.append('gitLink', data.gitLink)
+      formData.append('envFile', data.envFile[0])
+      formData.append('sshGitPrivateKey', data.sshGitPrivateKey[0])
+
+      const { serverUrl, port } = miniBack;
+      const url = `http://${serverUrl}:${port}/project`
+
+      setLoading(true)
+      axios.post(url)
+        .then(() => {
+          navigate('/')
+        })
+        .catch(error => {
+          console.log(error)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+
   }
 
   const comeBack = (): void => {
     navigate(`/mini-back/${miniBackId}`)
   }
 
-  return (
+  return loading ? <Spinner typeOfMessages={null} /> : (
     <Container>
       <FormContainer>
         <ProjectOptionsContainer>
@@ -78,11 +101,12 @@ export const Project: FC = () => {
                   <FormHelperText>{errors.name.message}</FormHelperText>
                 )}
               </FormControl>
-              {/* <FormControl>
+              <FormControl>
                 <TextField
                   label="Email"
                   size="small"
                   type="email"
+                  disabled
                   error={!!errors.email}
                   defaultValue={email}
                   inputProps={{ readOnly: true }}
@@ -97,7 +121,7 @@ export const Project: FC = () => {
                 {errors.email && (
                   <FormHelperText>{errors.email.message}</FormHelperText>
                 )}
-              </FormControl> */}
+              </FormControl>
             </SectionInputs>
           </Section>
           <Section>
@@ -150,27 +174,6 @@ export const Project: FC = () => {
           <Section>
             <SectionHeader>Project data</SectionHeader>
             <SectionInputs>
-              <FormControl>
-                <TextField
-                  label="port"
-                  size="small"
-                  required
-                  error={!!errors.port}
-                  focused
-                  {...register('port', {
-                    required: 'Port is required',
-                    validate: {
-                      isNumber: (value) => !isNaN(value) || 'Port must be a number',
-                      min: (value: any) => parseInt(value) >= 0 || 'Port can not be less than 0',
-                      max: (value: any) => parseInt(value) <= 65535 || 'Port can not be bigger than 65535',
-
-                    },
-                  })}
-                />
-                {errors.port && <FormHelperText>
-                  {errors.port.message}
-                </FormHelperText>}
-              </FormControl>
               <FormControl>
                 <Button
                   component="label"

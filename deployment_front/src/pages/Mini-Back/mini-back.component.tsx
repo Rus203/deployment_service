@@ -2,11 +2,10 @@ import {
   Button,
   TextField
 } from "@mui/material";
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../../Components/Spinner';
-import { IMiniBack } from '../../interface/miniback.interface';
 import {
   ButtonsContainer,
   Container,

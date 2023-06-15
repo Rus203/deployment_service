@@ -28,10 +28,10 @@ export class SocketDeployGateway {
     this.miniBackService
       .placeMiniBake({ ...dto, userId: client.data.payload.id })
       .then(() => {
-        this.server.emit(`finish-deploy-${dto.id}`);
+        this.server.emit(`finish-deploy-mini-back${dto.id}`);
       })
       .catch((error) => {
-        this.server.emit('error', error.message);
+        this.server.emit(`error-${dto.id}`, error.message);
       });
   }
 
@@ -44,10 +44,10 @@ export class SocketDeployGateway {
     this.miniBackService
       .delete({ ...dto, userId: client.data.payload.id })
       .then(() => {
-        this.server.emit(`finish-delete-${dto.id}`);
+        this.server.emit(`finish-delete-mini-back-${dto.id}`);
       })
       .catch((error) => {
-        this.server.emit('error', error.message);
+        this.server.emit(`error-${dto.id}`, error.message);
       });
   }
 }

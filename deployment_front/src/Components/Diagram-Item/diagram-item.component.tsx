@@ -3,7 +3,7 @@ import { IMiniBack } from '../../interface/miniback.interface';
 
 import { CircularProgressbar } from 'react-circular-progressbar';
 import InfoTable from '../InfoTable/info-table.component';
-import { Instance, SectionName, Section, DiagramsContainer, Item, Title, TableContainer } from './diagram-item.styles';
+import { Instance, SectionName, Section, DiagramsContainer, Item, Title, TableContainer, SpinBlock } from './diagram-item.styles';
 import { getByPattern } from '../../utils/getByPattern';
 import io from 'socket.io-client'
 import { MiniBackState } from '../../utils/mini-back-state.enum';
@@ -49,7 +49,7 @@ const DiagramItem: FC<IProps> = ({ miniback }) => {
     }
   }, [miniback])
 
-  return !servers ? <Spinner typeOfMessages={null}/> : (
+  return !servers ? <SpinBlock><Spinner typeOfMessages={null}/></SpinBlock> : (
     <Instance>
       <SectionName>{capitalizeFirstLowercaseRest(miniback.name)}</SectionName>
       <Section>

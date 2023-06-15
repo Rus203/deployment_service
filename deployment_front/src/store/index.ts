@@ -12,7 +12,7 @@ import {
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
-import { authReducer, miniBackReducer } from './Slices'
+import { authReducer, miniBackReducer, projectReducer } from './Slices'
 
 const persistConfig = {
   key: 'root',
@@ -23,7 +23,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  miniBack: miniBackReducer
+  miniBack: miniBackReducer,
+  project: projectReducer
 })
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
