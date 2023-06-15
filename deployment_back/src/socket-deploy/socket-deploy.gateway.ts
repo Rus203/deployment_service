@@ -28,7 +28,7 @@ export class SocketDeployGateway {
     this.miniBackService
       .placeMiniBake({ ...dto, userId: client.data.payload.id })
       .then(() => {
-        this.server.emit('finish-deploy');
+        this.server.emit(`finish-deploy-${dto.id}`);
       })
       .catch((error) => {
         this.server.emit('error', error.message);
@@ -44,7 +44,7 @@ export class SocketDeployGateway {
     this.miniBackService
       .delete({ ...dto, userId: client.data.payload.id })
       .then(() => {
-        this.server.emit('finish-delete');
+        this.server.emit(`finish-delete-${dto.id}`);
       })
       .catch((error) => {
         this.server.emit('error', error.message);

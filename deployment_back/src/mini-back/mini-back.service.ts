@@ -14,8 +14,8 @@ import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { normalizeProjectName } from 'src/utils';
 import { DeleteStatus, DeployStatus, ProjectState } from '../enums';
-import { chmodSync } from 'fs';
-import { ProgressGateway } from 'src/socket-progress/progress.gateway';
+import { chmodSync, existsSync } from 'fs';
+import { SocketProgressGateway } from '../socket-progress/socket-progress.gateway';
 import { makeCopyFile } from '../utils/make-copy-file';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     private fileEncryptorProvider: FileEncryptorProvider,
     @InjectRepository(MiniBack)
     private miniBackRepository: Repository<MiniBack>,
-    private socket: ProgressGateway,
+    private socket: SocketProgressGateway,
   ) {}
 
   async onApplicationBootstrap() {
@@ -100,11 +100,12 @@ export class MiniBackService implements OnApplicationBootstrap {
   }
 
   async delete(dto: GetMiniBackDto) {
-    this.socket.emitDeleteStatus(DeleteStatus.START);
     const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new Error('The instance of mini back not found');
     }
+
+    this.socket.emitDeleteStatus(DeleteStatus.START, currentMiniBack.id);
 
     try {
       if (currentMiniBack.deployState === ProjectState.DEPLOYED) {
@@ -114,20 +115,20 @@ export class MiniBackService implements OnApplicationBootstrap {
       throw error;
     } finally {
       await this.miniBackRepository.delete({ id: dto.id });
-      if (fs.access(currentMiniBack.sshServerPrivateKeyPath)) {
-        await fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
+      if (existsSync(currentMiniBack.sshServerPrivateKeyPath)) {
+        fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
       }
-      this.socket.emitDeleteStatus(DeleteStatus.FINISH);
+      this.socket.emitDeleteStatus(DeleteStatus.FINISH, currentMiniBack.id);
     }
   }
 
   async placeMiniBake(dto: GetMiniBackDto) {
-    this.socket.emitDeployStatus(DeployStatus.START);
     const currentMiniBack = await this.getOne(dto);
     if (currentMiniBack === null) {
       throw new Error('Nof found the instance of mini back');
     }
 
+    this.socket.emitDeployStatus(DeployStatus.START, currentMiniBack.id);
     const deployState = currentMiniBack.deployState;
     if (deployState !== ProjectState.UNDEPLOYED) {
       throw new Error(
@@ -146,7 +147,7 @@ export class MiniBackService implements OnApplicationBootstrap {
       'id_rsa.enc',
     );
 
-    if (!fs.access(miniBackPrivateKey)) {
+    if (!existsSync(miniBackPrivateKey)) {
       throw new Error("Secret key of mini back wasn't provided");
     }
 
@@ -166,7 +167,7 @@ export class MiniBackService implements OnApplicationBootstrap {
 
     chmodSync(tempMiniBackPrivateKeyPath, 0o600);
 
-    this.socket.emitDeployStatus(DeployStatus.PREPARING);
+    this.socket.emitDeployStatus(DeployStatus.PREPARING, currentMiniBack.id);
     try {
       // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
@@ -178,7 +179,10 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
-      this.socket.emitDeployStatus(DeployStatus.PUT_DIRECTORY);
+      this.socket.emitDeployStatus(
+        DeployStatus.PUT_DIRECTORY,
+        currentMiniBack.id,
+      );
 
       await this.sshProvider.putFileInDir(
         {
@@ -189,7 +193,7 @@ export class MiniBackService implements OnApplicationBootstrap {
         join(`${nameRemoteRepository}`, 'id_rsa'),
       );
 
-      this.socket.emitDeployStatus(DeployStatus.PUT_KEY);
+      this.socket.emitDeployStatus(DeployStatus.PUT_KEY, currentMiniBack.id);
 
       // pull docker
       await this.sshProvider.pullDocker(
@@ -200,7 +204,10 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
-      this.socket.emitDeployStatus(DeployStatus.PULL_DOCKER);
+      this.socket.emitDeployStatus(
+        DeployStatus.PULL_DOCKER,
+        currentMiniBack.id,
+      );
 
       // pull mini back from github repo
       await this.sshProvider.pullMiniBack(
@@ -212,7 +219,10 @@ export class MiniBackService implements OnApplicationBootstrap {
         gitProjectLink,
       );
 
-      this.socket.emitDeployStatus(DeployStatus.PULL_MINIBACK);
+      this.socket.emitDeployStatus(
+        DeployStatus.PULL_MINIBACK,
+        currentMiniBack.id,
+      );
 
       await this.sshProvider.runMiniBack(
         {
@@ -222,14 +232,20 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
-      this.socket.emitDeployStatus(DeployStatus.RUN_MINIBACK);
+      this.socket.emitDeployStatus(
+        DeployStatus.RUN_MINIBACK,
+        currentMiniBack.id,
+      );
 
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
         { deployState: ProjectState.DEPLOYED },
       );
 
-      this.socket.emitDeployStatus(DeployStatus.UPDATE_STATUS);
+      this.socket.emitDeployStatus(
+        DeployStatus.UPDATE_STATUS,
+        currentMiniBack.id,
+      );
     } catch (error: any) {
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
@@ -246,11 +262,11 @@ export class MiniBackService implements OnApplicationBootstrap {
         tempSshFilePrivateKeyPath,
       );
 
-      if (fs.access(tempMiniBackPrivateKeyPath)) {
-        await fs.unlink(tempMiniBackPrivateKeyPath);
+      if (existsSync(tempMiniBackPrivateKeyPath)) {
+        fs.unlink(tempMiniBackPrivateKeyPath);
       }
 
-      this.socket.emitDeployStatus(DeployStatus.FINISH);
+      this.socket.emitDeployStatus(DeployStatus.FINISH, currentMiniBack.id);
     }
   }
 
@@ -271,7 +287,7 @@ export class MiniBackService implements OnApplicationBootstrap {
         '',
       );
 
-      this.socket.emitDeleteStatus(DeleteStatus.PREPARING);
+      this.socket.emitDeleteStatus(DeleteStatus.PREPARING, currentMiniBack.id);
 
       await this.sshProvider.deleteMiniBack(
         {
@@ -281,12 +297,12 @@ export class MiniBackService implements OnApplicationBootstrap {
         nameRemoteRepository,
       );
 
-      this.socket.emitDeleteStatus(DeleteStatus.DELETING);
+      this.socket.emitDeleteStatus(DeleteStatus.DELETING, currentMiniBack.id);
     } catch (error: any) {
       throw error;
     } finally {
-      if (fs.access(tempSshFilePrivateKeyPath)) {
-        await fs.unlink(tempSshFilePrivateKeyPath);
+      if (existsSync(tempSshFilePrivateKeyPath)) {
+        fs.unlink(tempSshFilePrivateKeyPath);
       }
     }
   }
