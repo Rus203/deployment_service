@@ -69,7 +69,7 @@ const DashBoardMiniBackTable: FC = () => {
                   miniBackCollection.map((row: IMiniBack, index) => (
                     <TableItem
                       key={index}
-                      index={index}
+                      index={index + 1}
                       row={row}
                       followToProjects={handleFollowToProjects}
                     />

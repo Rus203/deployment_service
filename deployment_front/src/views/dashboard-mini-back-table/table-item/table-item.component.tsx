@@ -62,6 +62,7 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
         console.log("finish-delete")
         dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(deleteMiniBackItem({ id: row.id }))
+        dispatch(deleteMiniBackProjects({ id: row.id }))
       })
 
       socketInstance?.on(`finish-deploy-mini-back-${row.id}`, data => {
@@ -86,8 +87,6 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
   const handleDelete = (event: SyntheticEvent) => {
     event.stopPropagation()
     console.log('delete-miniback')
-    dispatch(deleteMiniBackItem({ id: row.id }))
-    dispatch(deleteMiniBackProjects({ id: row.id }))
     socket?.emit('delete-miniback', { id: row.id })
   }
 
