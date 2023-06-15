@@ -10,8 +10,9 @@ import {
   rejectMiniBackLoading,
   setMiniBackLoading,
   setMiniBackStatus,
-  successMiniBackLoading
+  successMiniBackLoading,
 } from '../../../store/Slices/mini-back.slice';
+import { deleteMiniBackProjects } from '../../../store/Slices/project.slice'
 import CircularStatic from '../../../Components/CircularProgressWithLabel/circular-progress-with-label.component';
 
 type Props = {
@@ -57,13 +58,13 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
         setLoadingAmount(data)
       })
 
-      socketInstance?.on(`finish-delete-mini-back${row.id}`, data => {
+      socketInstance?.on(`finish-delete-mini-back-${row.id}`, data => {
         console.log("finish-delete")
         dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(deleteMiniBackItem({ id: row.id }))
       })
 
-      socketInstance?.on(`finish-deploy-mini-back${row.id}`, data => {
+      socketInstance?.on(`finish-deploy-mini-back-${row.id}`, data => {
         console.log('finish-deploy')
         dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(setMiniBackStatus({ id: row.id, status: MiniBackState.DEPLOYED }))
@@ -85,7 +86,8 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
   const handleDelete = (event: SyntheticEvent) => {
     event.stopPropagation()
     console.log('delete-miniback')
-    dispatch(setMiniBackLoading({ id: row.id }))
+    dispatch(deleteMiniBackItem({ id: row.id }))
+    dispatch(deleteMiniBackProjects({ id: row.id }))
     socket?.emit('delete-miniback', { id: row.id })
   }
 

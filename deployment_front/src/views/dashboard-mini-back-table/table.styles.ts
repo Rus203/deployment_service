@@ -17,5 +17,12 @@ export const FixedTable = styled.div`
   overflow-y: auto;
 `
 
+export const SpinBlock = styled.div`
+  height: 40vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
+
 
 

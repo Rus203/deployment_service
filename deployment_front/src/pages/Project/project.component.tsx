@@ -48,10 +48,10 @@ export const Project: FC = () => {
   const sshGitPrivateKey = watch('sshGitPrivateKey')
 
   const onSubmit = async (data: IProject) => {
-    if (miniBack) {
+    if (miniBack && email) {
       const formData = new FormData()
       formData.append('name', data.name)
-      formData.append('email', data.email)
+      formData.append('email', email)
       formData.append('gitLink', data.gitLink)
       formData.append('envFile', data.envFile[0])
       formData.append('sshGitPrivateKey', data.sshGitPrivateKey[0])
@@ -59,10 +59,12 @@ export const Project: FC = () => {
       const { serverUrl, port } = miniBack;
       const url = `http://${serverUrl}:${port}/project`
 
+      console.log(data.email)
+      console.log(email)
       setLoading(true)
-      axios.post(url)
+      axios.post(url, formData)
         .then(() => {
-          navigate('/')
+          navigate(`/mini-back/${miniBackId}`)
         })
         .catch(error => {
           console.log(error)

@@ -32,6 +32,7 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
 
     const handleDelete = (event: SyntheticEvent) => {
       event.stopPropagation()
+      setLoadingAmount(0);
       console.log('delete-project')
       dispatch(setProjectLoading({ id: project.id }))
       socket?.emit('delete-project', { id: project.id })
@@ -39,6 +40,7 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
   
     const handleDeploy = (event: SyntheticEvent) => {
       event.stopPropagation()
+      setLoadingAmount(0);
       dispatch(setProjectLoading({ id: project.id }))
       socket?.emit(`deploy-project`, { id: project.id })
     }
@@ -69,7 +71,6 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
 
       socketInstance?.on(`finish-delete-project-${project.id}`, data => {
         console.log("finish-delete")
-        dispatch(successProjectLoading({ id: project.id }))
         dispatch(deleteProjectItem({ id: project.id }))
       })
 

@@ -6,6 +6,7 @@ interface IProjectLoader extends IProject {
   error: boolean;
   success: boolean;
   isLoading: boolean;
+  miniBackId: string;
 }
 
 interface IInitialState {
@@ -20,10 +21,11 @@ const projectSlice = createSlice({
   name: "project",
   initialState,
   reducers: {
-    setProjectCollection: (state, action: PayloadAction<IProject[]>) => {
-      state.projectCollection = action.payload.map((el) => {
+    setProjectCollection: (state, action: PayloadAction<{ projects: IProject[], miniBackId: string}>) => {
+      state.projectCollection = action.payload.projects.map((el) => {
         return {
           ...el,
+          miniBackId: action.payload.miniBackId,
           error: false,
           success: false,
           isLoading: false,
@@ -36,6 +38,10 @@ const projectSlice = createSlice({
       state.projectCollection = state.projectCollection.filter(
         (item) => item.id !== action.payload.id
       );
+    },
+
+    deleteMiniBackProjects: (state, action: PayloadAction<{ id: string }>) => {
+      state.projectCollection = state.projectCollection.filter(item => item.id !== action.payload.id)
     },
 
     setProjectStatus: (
@@ -72,6 +78,7 @@ const projectSlice = createSlice({
         if (value.id === action.payload.id) {
           return {
             ...value,
+            state: ProjectState.DEPLOYED,
             success: true,
             isLoading: false,
           };
@@ -102,6 +109,7 @@ export const {
   rejectProjectLoading,
   setProjectLoading,
   successProjectLoading,
+  deleteMiniBackProjects
 } = projectSlice.actions;
 
 export default projectSlice.reducer;

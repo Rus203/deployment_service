@@ -22,3 +22,9 @@ export const ControlButtons = styled.div`
   column-gap: 20px;
   justify-content: flex-end;
 `
+export const SpinBlock = styled.div`
+  height: 40vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`
