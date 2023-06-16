@@ -1,5 +1,5 @@
 import { Button, TableCell, TableRow } from '@mui/material';
-import { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { FC, SyntheticEvent, useEffect, useState, useLayoutEffect } from 'react';
 import { IMiniBack } from '../../../interface/miniback.interface';
 import { MiniBackState } from '../../../utils/mini-back-state.enum';
 import io, { Socket } from 'socket.io-client'
@@ -30,7 +30,7 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
   const loading = useAppSelector(state => state.miniBack.miniBackCollection).find(el => el.id === row.id)?.isLoading
   const dispatch = useAppDispatch()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (account) {
       const url = process.env.NODE_ENV === 'production'
         ? process.env.REACT_APP_SOCKET_BACK_DEPLOYMENT_URL!
@@ -48,12 +48,13 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       })
 
       socketInstance?.on(`progress-deploy-mini-back-${row.id}`, data => {
-        console.log(data)
+        console.log('progress-deploy-mini-back', data)
+        dispatch(setMiniBackLoading({ id: row.id }))
         setLoadingAmount(data)
       })
 
       socketInstance?.on(`progress-delete-mini-back-${row.id}`, data => {
-        console.log(data)
+        console.log('progress-delete-mini-back', data)
         dispatch(setMiniBackLoading({ id: row.id }))
         setLoadingAmount(data)
       })
