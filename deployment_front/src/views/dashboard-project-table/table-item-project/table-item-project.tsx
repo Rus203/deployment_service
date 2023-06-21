@@ -97,7 +97,7 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
       key={index}
       sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 } }}
     >
-      <TableCell>{index + 1}</TableCell>
+      <TableCell>{index}</TableCell>
       <TableCell sx={{ py: theme => `${theme.spacing(0.5)} !important` }}>
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <Typography sx={{ fontWeight: 500, fontSize: '0.875rem !important' }}>{project.name}</Typography>
