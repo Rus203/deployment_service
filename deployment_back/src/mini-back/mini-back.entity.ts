@@ -47,4 +47,7 @@ export class MiniBack {
 
   @Column()
   port: number;
+
+  @Column({ name: 'user_name' })
+  userName: string;
 }

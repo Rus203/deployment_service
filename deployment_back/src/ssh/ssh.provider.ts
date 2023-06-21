@@ -2,10 +2,17 @@ import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { Injectable } from '@nestjs/common';
 import { ChildProcessCommandProvider } from 'src/utils';
+import { Client } from 'ssh2';
 
 export interface ISshConnectionOptions {
   sshLink: string;
   pathToSSHPrivateKey: string;
+}
+
+export interface ISshTestConnection {
+  pathToSSHPrivateKey: string;
+  userName: string;
+  serverUrl: string;
 }
 
 @Injectable()
@@ -182,6 +189,34 @@ export class SshProvider extends ChildProcessCommandProvider {
       });
 
       this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
+
+  testSshConnection({
+    pathToSSHPrivateKey,
+    userName,
+    serverUrl,
+  }: ISshTestConnection): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const conn = new Client();
+
+      conn.on('ready', () => {
+        conn.end();
+        resolve(true);
+      });
+
+      conn.on('error', (err) => {
+        console.log('connection error', err);
+        conn.end();
+        reject(err);
+      });
+
+      conn.connect({
+        host: serverUrl,
+        port: 22,
+        username: userName,
+        privateKey: fs.readFileSync(pathToSSHPrivateKey),
+      });
     });
   }
 }

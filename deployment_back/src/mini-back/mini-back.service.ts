@@ -68,7 +68,7 @@ export class MiniBackService implements OnApplicationBootstrap {
       userId: string;
     },
   ) {
-    const serverUrl = dto.sshConnectionString.split('@')[1];
+    const [userName, serverUrl] = dto.sshConnectionString.split('@');
     const candidate = await this.getOne({
       userId: dto.userId,
       serverUrl,
@@ -90,6 +90,7 @@ export class MiniBackService implements OnApplicationBootstrap {
       ...dto,
       port,
       serverUrl,
+      userName,
     });
     const { sshServerPrivateKeyPath, nameRemoteRepository, ...rest } =
       await this.miniBackRepository.save({
@@ -169,6 +170,17 @@ export class MiniBackService implements OnApplicationBootstrap {
 
     this.socket.emitDeployStatus(DeployStatus.PREPARING, currentMiniBack.id);
     try {
+      this.socket.emitDeployStatus(
+        DeployStatus.CHECK_CONNECTION,
+        currentMiniBack.id,
+      );
+
+      await this.sshProvider.testSshConnection({
+        pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
+        userName: currentMiniBack.userName,
+        serverUrl: currentMiniBack.serverUrl,
+      });
+
       // place the private key of mini back
       await this.sshProvider.putDirectoryToRemoteServer(
         {
@@ -288,6 +300,17 @@ export class MiniBackService implements OnApplicationBootstrap {
       );
 
       this.socket.emitDeleteStatus(DeleteStatus.PREPARING, currentMiniBack.id);
+
+      await this.sshProvider.testSshConnection({
+        pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
+        userName: currentMiniBack.userName,
+        serverUrl: currentMiniBack.serverUrl,
+      });
+
+      this.socket.emitDeleteStatus(
+        DeleteStatus.CHECK_CONNECTION,
+        currentMiniBack.id,
+      );
 
       await this.sshProvider.deleteMiniBack(
         {
