@@ -6,6 +6,7 @@ interface IMinibackLoader extends IMiniBack {
   error: boolean;
   success: boolean;
   isLoading: boolean;
+  loadingAmount: number;
 }
 
 interface IInitialState {
@@ -22,11 +23,17 @@ const miniBackSlice = createSlice({
   reducers: {
     setMiniBackCollection: (state, action: PayloadAction<IMiniBack[]>) => {
       state.miniBackCollection = action.payload.map((el) => {
+        const miniback = state.miniBackCollection.find(item => item.id === el.id)
+        if (miniback)  {
+          return miniback
+        }
+
         return {
           ...el,
           error: false,
           success: false,
           isLoading: false,
+          loadingAmount: 0,
         }
       });
     },
@@ -53,12 +60,12 @@ const miniBackSlice = createSlice({
       });
     },
 
-    setMiniBackLoading: (state, action: PayloadAction<{ id: string }>) => {
-      console.log(action.payload.id);
+    setLoadingMiniBack: (state, action: PayloadAction<{ loadingAmount: number, miniBackId: string}>) => {
       state.miniBackCollection = state.miniBackCollection.map((value) => {
-        if (value.id === action.payload.id) {
+        if (value.id === action.payload.miniBackId) {
           return {
             ...value,
+            loadingAmount: action.payload.loadingAmount,
             isLoading: true,
           };
         }
@@ -72,6 +79,7 @@ const miniBackSlice = createSlice({
         if (value.id === action.payload.id) {
           return {
             ...value,
+            state: MiniBackState.DEPLOYED,
             success: true,
             isLoading: false,
           };
@@ -100,7 +108,7 @@ export const {
   deleteMiniBackItem,
   setMiniBackStatus,
   rejectMiniBackLoading,
-  setMiniBackLoading,
+  setLoadingMiniBack,
   successMiniBackLoading,
 } = miniBackSlice.actions;
 

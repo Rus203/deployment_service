@@ -2,7 +2,7 @@ import {
   Button,
   TextField
 } from "@mui/material";
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../../Components/Spinner';
@@ -20,6 +20,7 @@ import {
   SelectProjectsContainer
 } from "./mini-back.styles";
 import axios from '../../utils/axios.instance'
+import { IMiniBack } from "../../interface/miniback.interface";
 
 interface IMiniBackInputs {
   name: string,
@@ -29,6 +30,7 @@ interface IMiniBackInputs {
 
 export const MiniBack: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [notAvailableUrls, setNotAvailableUrls] = useState<string[]>([])
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IMiniBackInputs>({
     mode: 'onChange'
   });
@@ -36,6 +38,14 @@ export const MiniBack: FC = () => {
   const navigate = useNavigate();
 
   const sshServerPrivateKey = watch('sshServerPrivateKey');
+
+  useEffect(() => {
+    axios.get('mini-back').then(res => {
+      const urls = res.data.map((item: IMiniBack) => item.serverUrl)
+      console.log(urls)
+      setNotAvailableUrls(urls)
+    })
+  }, [])
 
   const onSubmit = async (data: IMiniBackInputs) => {
     const formData = new FormData()
@@ -98,6 +108,10 @@ export const MiniBack: FC = () => {
                       value: /^[a-zA-Z]+@[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/,
                       message: "Please Enter a valid ssh connection string"
                     },
+                    validate: (value) => {
+                      let url = value.split('@')[1];
+                      return notAvailableUrls.every(item => item !== url) || 'This sever is\'t available'
+                    }
                   })}
                 />
                 {errors.sshConnectionString && (

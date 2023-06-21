@@ -8,7 +8,7 @@ import Alert from '../../../Components/Alert';
 import {
   deleteMiniBackItem,
   rejectMiniBackLoading,
-  setMiniBackLoading,
+  setLoadingMiniBack,
   setMiniBackStatus,
   successMiniBackLoading,
 } from '../../../store/Slices/mini-back.slice';
@@ -22,12 +22,11 @@ type Props = {
 }
 
 const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
-  const [loadingAmount, setLoadingAmount] = useState<number>(0)
   const [socket, setSocket] = useState<Socket>()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [isShowAlert, setIsShowAlert] = useState<boolean>(false)
   const account = useAppSelector(state => state.auth.account)
-  const loading = useAppSelector(state => state.miniBack.miniBackCollection).find(el => el.id === row.id)?.isLoading
+  const loading = useAppSelector(state => state.miniBack.miniBackCollection).find(el => el.id === row.id)
   const dispatch = useAppDispatch()
 
   useLayoutEffect(() => {
@@ -49,14 +48,12 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
 
       socketInstance?.on(`progress-deploy-mini-back-${row.id}`, data => {
         console.log('progress-deploy-mini-back', data)
-        dispatch(setMiniBackLoading({ id: row.id }))
-        setLoadingAmount(data)
+        dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: data }))
       })
 
       socketInstance?.on(`progress-delete-mini-back-${row.id}`, data => {
         console.log('progress-delete-mini-back', data)
-        dispatch(setMiniBackLoading({ id: row.id }))
-        setLoadingAmount(data)
+        dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: data }))
       })
 
       socketInstance?.on(`finish-delete-mini-back-${row.id}`, data => {
@@ -87,13 +84,13 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
 
   const handleDelete = (event: SyntheticEvent) => {
     event.stopPropagation()
-    console.log('delete-miniback')
+    dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: 0 }))
     socket?.emit('delete-miniback', { id: row.id })
   }
 
   const handleDeploy = (event: SyntheticEvent) => {
     event.stopPropagation()
-    dispatch(setMiniBackLoading({ id: row.id }))
+    dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: 0 }))
     socket?.emit(`deploy-miniback`, { id: row.id })
   }
 
@@ -109,7 +106,7 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
 
     <TableRow
       hover
-      onClick={() => followToProjects(row.id)}
+      onDoubleClick={() => followToProjects(row.id)}
       sx={{ '&:last-of-type td, &:last-of-type th': { border: 0 }, "cursor": "pointer" }}
     >
       <TableCell>{index}</TableCell>
@@ -119,8 +116,8 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       <TableCell>{row.deployState}</TableCell>
 
       <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-        {loading ?
-          <CircularStatic value={loadingAmount * 100} />
+        {loading?.isLoading ?
+          <CircularStatic value={loading.loadingAmount * 100} />
           :
           <>
             <Button

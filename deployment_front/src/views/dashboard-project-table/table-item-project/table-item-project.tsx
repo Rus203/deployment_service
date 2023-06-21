@@ -9,8 +9,8 @@ import CircularStatic from '../../../Components/CircularProgressWithLabel/circul
 import {
   deleteProjectItem,
   rejectProjectLoading,
-  setProjectLoading,
   setProjectStatus,
+  setLoadingAmount,
   successProjectLoading } from '../../../store/Slices/project.slice';
 
 interface Props {
@@ -21,27 +21,24 @@ interface Props {
 }
 
 const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
-  const [loadingAmount, setLoadingAmount] = useState<number>(0)
   const [socket, setSocket] = useState<Socket>()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [isShowAlert, setIsShowAlert] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const loading = useAppSelector(state => state.project.projectCollection)
-    .find(el => el.id === project.id)?.isLoading
+    .find(el => el.id === project.id)
 
 
     const handleDelete = (event: SyntheticEvent) => {
       event.stopPropagation()
-      setLoadingAmount(0);
       console.log('delete-project')
-      dispatch(setProjectLoading({ id: project.id }))
+      dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: 0 }))
       socket?.emit('delete-project', { id: project.id })
     }
   
     const handleDeploy = (event: SyntheticEvent) => {
       event.stopPropagation()
-      setLoadingAmount(0);
-      dispatch(setProjectLoading({ id: project.id }))
+      dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: 0 }))
       socket?.emit(`deploy-project`, { id: project.id })
     }
 
@@ -60,12 +57,13 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
 
       socketInstance?.on(`progress-deploy-project-${project.id}`, data => {
         console.log(data)
+        dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: data}))
         setLoadingAmount(data)
       })
 
       socketInstance?.on(`progress-delete-project-${project.id}`, data => {
         console.log(data)
-        dispatch(setProjectLoading({ id: project.id }))
+        dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: data}))
         setLoadingAmount(data)
       })
 
@@ -91,6 +89,8 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
     }
   }, [isShowAlert])
 
+  console.log('loading: ',loading?.isLoading)
+
   return (
     <TableRow
       hover
@@ -107,8 +107,8 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
       <TableCell>{project.gitLink}</TableCell>
       <TableCell>{project.state}</TableCell>
       <TableCell colSpan={4} sx={{ display: 'flex', justifyContent: 'space-around', columnGap: '15px' }} >
-      {loading ?
-          <CircularStatic value={loadingAmount * 100} />
+      {loading?.isLoading ?
+          <CircularStatic value={loading.loadingAmount * 100} />
           :
           <>
             <Button

@@ -7,6 +7,7 @@ interface IProjectLoader extends IProject {
   success: boolean;
   isLoading: boolean;
   miniBackId: string;
+  loadingAmount: number;
 }
 
 interface IInitialState {
@@ -23,18 +24,23 @@ const projectSlice = createSlice({
   reducers: {
     setProjectCollection: (state, action: PayloadAction<{ projects: IProject[], miniBackId: string}>) => {
       state.projectCollection = action.payload.projects.map((el) => {
+        const project = state.projectCollection.find(item => item.id === el.id)
+        if (project) {
+          return project
+        }
+
         return {
           ...el,
           miniBackId: action.payload.miniBackId,
           error: false,
           success: false,
           isLoading: false,
+          loadingAmount: 0,
         }
       });
     },
 
     deleteProjectItem: (state, action: PayloadAction<{ id: string }>) => {
-      console.log(action.payload.id);
       state.projectCollection = state.projectCollection.filter(
         (item) => item.id !== action.payload.id
       );
@@ -59,21 +65,21 @@ const projectSlice = createSlice({
       });
     },
 
-    setProjectLoading: (state, action: PayloadAction<{ id: string }>) => {
-      console.log(action.payload.id);
-      state.projectCollection= state.projectCollection.map((value) => {
-        if (value.id === action.payload.id) {
+    setLoadingAmount: (state, action: PayloadAction<{ loadingAmount: number, projectId: string }>) => {
+      state.projectCollection = state.projectCollection.map(project => {
+        if (project.id === action.payload.projectId) {
           return {
-            ...value,
+            ...project,
             isLoading: true,
-          };
+            loadingAmount: action.payload.loadingAmount
+          }
         }
-        return value;
-      });
+
+        return project
+      })
     },
 
     successProjectLoading: (state, action: PayloadAction<{ id: string }>) => {
-      console.log(action.payload.id);
       state.projectCollection= state.projectCollection.map((value) => {
         if (value.id === action.payload.id) {
           return {
@@ -107,9 +113,9 @@ export const {
   deleteProjectItem,
   setProjectStatus,
   rejectProjectLoading,
-  setProjectLoading,
   successProjectLoading,
-  deleteMiniBackProjects
+  deleteMiniBackProjects,
+  setLoadingAmount
 } = projectSlice.actions;
 
 export default projectSlice.reducer;
