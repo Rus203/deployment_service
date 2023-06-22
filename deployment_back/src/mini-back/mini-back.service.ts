@@ -13,7 +13,7 @@ import { Repository } from 'typeorm';
 import { GetMiniBackDto } from './dto/get-mini-back.dto';
 import { CreateMiniBackDto } from './dto/create-mini-back.dto';
 import { normalizeProjectName } from 'src/utils';
-import { DeleteStatus, DeployStatus, ProjectState } from '../enums';
+import { DeleteStatus, DeployStatus, MiniBackState } from '../enums';
 import { chmodSync, existsSync } from 'fs';
 import { SocketProgressGateway } from '../socket-progress/socket-progress.gateway';
 import { makeCopyFile } from '../utils/make-copy-file';
@@ -92,11 +92,15 @@ export class MiniBackService implements OnApplicationBootstrap {
       serverUrl,
       userName,
     });
-    const { sshServerPrivateKeyPath, nameRemoteRepository, ...rest } =
-      await this.miniBackRepository.save({
-        ...instance,
-        nameRemoteRepository: process.env.REMOTE_REPOSITORY,
-      });
+    const {
+      sshServerPrivateKeyPath,
+      nameRemoteRepository,
+      sshConnectionString,
+      ...rest
+    } = await this.miniBackRepository.save({
+      ...instance,
+      nameRemoteRepository: process.env.REMOTE_REPOSITORY,
+    });
     return rest;
   }
 
@@ -109,7 +113,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     this.socket.emitDeleteStatus(DeleteStatus.START, currentMiniBack.id);
 
     try {
-      if (currentMiniBack.deployState === ProjectState.DEPLOYED) {
+      if (currentMiniBack.deployState === MiniBackState.DEPLOYED) {
         await this.deleteMiniBackFromServer(currentMiniBack);
       }
     } catch (error) {
@@ -131,7 +135,7 @@ export class MiniBackService implements OnApplicationBootstrap {
 
     this.socket.emitDeployStatus(DeployStatus.START, currentMiniBack.id);
     const deployState = currentMiniBack.deployState;
-    if (deployState !== ProjectState.UNDEPLOYED) {
+    if (deployState !== MiniBackState.UNDEPLOYED) {
       throw new Error(
         'This instance of mini_back has already either developed or failed via you are not able to do it',
       );
@@ -251,7 +255,7 @@ export class MiniBackService implements OnApplicationBootstrap {
 
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
-        { deployState: ProjectState.DEPLOYED },
+        { deployState: MiniBackState.DEPLOYED },
       );
 
       this.socket.emitDeployStatus(
@@ -261,7 +265,7 @@ export class MiniBackService implements OnApplicationBootstrap {
     } catch (error: any) {
       await this.miniBackRepository.update(
         { id: currentMiniBack.id },
-        { deployState: ProjectState.FAILED },
+        { deployState: MiniBackState.FAILED },
       );
 
       if (typeof error === 'string') {

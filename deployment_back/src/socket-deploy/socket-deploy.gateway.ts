@@ -11,8 +11,6 @@ import { MiniBackService } from 'src/mini-back/mini-back.service';
 import { GetMiniBackDto } from 'src/mini-back/dto/get-mini-back.dto';
 import { AuthGuard } from './socket-deploy.guard';
 
-// find out how to use only one instance if socket io
-
 @Injectable()
 @WebSocketGateway({ cors: '*' })
 export class SocketDeployGateway {
