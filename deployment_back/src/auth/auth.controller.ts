@@ -24,7 +24,7 @@ export class AuthController {
   @ApiConflictResponse({ description: 'Such email has already here' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiInternalServerErrorResponse({ description: 'Server error' })
-  @ApiResponse({ status: 201, description: 'No content' })
+  @ApiResponse({ status: 201, description: 'Created' })
   @Post('sign-up')
   async signUp(@Body() dto: AuthSignUpDto) {
     await this.authService.signUp(dto);
