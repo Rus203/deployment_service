@@ -42,7 +42,6 @@ export const MiniBack: FC = () => {
   useEffect(() => {
     axios.get('mini-back').then(res => {
       const urls = res.data.map((item: IMiniBack) => item.serverUrl)
-      console.log(urls)
       setNotAvailableUrls(urls)
     })
   }, [])

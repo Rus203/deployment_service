@@ -31,7 +31,6 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
 
     const handleDelete = (event: SyntheticEvent) => {
       event.stopPropagation()
-      console.log('delete-project')
       dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: 0 }))
       socket?.emit('delete-project', { id: project.id })
     }
@@ -48,7 +47,6 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
       setSocket(socketInstance)
 
       socketInstance?.on(`error-${project.id}`, data => {
-        console.log('errors ', data)
         setIsShowAlert(true)
         setErrorMessage(data)
         dispatch(setProjectStatus({ id: project.id, status: ProjectState.FAILED }))
@@ -56,24 +54,21 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
       })
 
       socketInstance?.on(`progress-deploy-project-${project.id}`, data => {
-        console.log(data)
         dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: data}))
         setLoadingAmount(data)
       })
 
       socketInstance?.on(`progress-delete-project-${project.id}`, data => {
-        console.log(data)
         dispatch(setLoadingAmount({ projectId: project.id, loadingAmount: data}))
         setLoadingAmount(data)
       })
 
       socketInstance?.on(`finish-delete-project-${project.id}`, data => {
-        console.log("finish-delete")
         dispatch(deleteProjectItem({ id: project.id }))
       })
 
       socketInstance?.on(`finish-deploy-project-${project.id}`, data => {
-        console.log('finish-deploy')
+
         dispatch(successProjectLoading({ id: project.id }))
         dispatch(setProjectStatus({ id: project.id, status: ProjectState.DEPLOYED }))
       })
@@ -88,8 +83,6 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
       return () => clearTimeout(timerId);
     }
   }, [isShowAlert])
-
-  console.log('loading: ',loading?.isLoading)
 
   return (
     <TableRow

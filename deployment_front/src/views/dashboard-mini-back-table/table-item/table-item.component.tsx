@@ -39,7 +39,6 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       setSocket(socketInstance)
 
       socketInstance?.on(`error-${row.id}`, data => {
-        console.log('errors ', data)
         setIsShowAlert(true)
         setErrorMessage(data)
         dispatch(setMiniBackStatus({ id: row.id, status: MiniBackState.FAILED }))
@@ -52,19 +51,16 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       })
 
       socketInstance?.on(`progress-delete-mini-back-${row.id}`, data => {
-        console.log('progress-delete-mini-back', data)
         dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: data }))
       })
 
       socketInstance?.on(`finish-delete-mini-back-${row.id}`, data => {
-        console.log("finish-delete")
         dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(deleteMiniBackItem({ id: row.id }))
         dispatch(deleteMiniBackProjects({ id: row.id }))
       })
 
       socketInstance?.on(`finish-deploy-mini-back-${row.id}`, data => {
-        console.log('finish-deploy')
         dispatch(successMiniBackLoading({ id: row.id }))
         dispatch(setMiniBackStatus({ id: row.id, status: MiniBackState.DEPLOYED }))
       })

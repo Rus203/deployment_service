@@ -59,8 +59,6 @@ export const Project: FC = () => {
       const { serverUrl, port } = miniBack;
       const url = `http://${serverUrl}:${port}/project`
 
-      console.log(data.email)
-      console.log(email)
       setLoading(true)
       axios.post(url, formData)
         .then(() => {

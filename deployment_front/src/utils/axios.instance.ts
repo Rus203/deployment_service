@@ -3,8 +3,8 @@ import store from '../store';
 import { updateCredentials, logOut } from "../store/Slices";
 
 const baseURL = process.env.NODE_ENV === 'production'
-  ? 'http://209.38.193.18:3000/api'
-  : 'http://localhost:3000/api'
+  ? process.env.REACT_APP_BACK_DEPLOYMENT_URL
+  : process.env.REACT_APP_BACK_DEV_URL
 
 const instance = axios.create({ baseURL });
 let isRefreshing = false;
@@ -27,8 +27,6 @@ instance.interceptors.response.use(response => response, async (error) => {
     const account = store.getState().auth.account;
     if (account !== null) {
       try {
-        console.log('Before updating');
-
         const response = await axios.post(baseURL + '/auth/refresh', {
           refreshToken: account.refreshToken
         });

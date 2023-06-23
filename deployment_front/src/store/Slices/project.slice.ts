@@ -26,6 +26,10 @@ const projectSlice = createSlice({
       state.projectCollection = action.payload.projects.map((el) => {
         const project = state.projectCollection.find(item => item.id === el.id)
         if (project) {
+          if (el.state !== ProjectState.UNDEPLOYED) {
+            project.isLoading = false
+          }
+
           return project
         }
 
@@ -47,7 +51,7 @@ const projectSlice = createSlice({
     },
 
     deleteMiniBackProjects: (state, action: PayloadAction<{ id: string }>) => {
-      state.projectCollection = state.projectCollection.filter(item => item.id !== action.payload.id)
+      state.projectCollection = state.projectCollection.filter(item => item.miniBackId !== action.payload.id)
     },
 
     setProjectStatus: (

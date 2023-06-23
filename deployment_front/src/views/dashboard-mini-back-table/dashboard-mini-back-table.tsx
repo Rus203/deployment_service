@@ -28,7 +28,6 @@ const DashBoardMiniBackTable: FC = () => {
       .then(res => {
         setMiniBackCollection(res.data)
         dispatch(setMiniBackCollection(res.data))
-        console.log(res.data)
       })
       .catch(error => {
         console.log(error)

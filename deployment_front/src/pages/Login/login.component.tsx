@@ -55,10 +55,8 @@ const Login: FC = () => {
   } = useForm<Inputs>();
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(123)
     axios.post('/auth/sign-in', data)
     .then(res => {
-      console.log('first')
       dispatch(setCredentials(res.data))
       navigate('/')
     })

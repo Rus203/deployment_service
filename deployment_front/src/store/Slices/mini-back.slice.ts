@@ -25,6 +25,10 @@ const miniBackSlice = createSlice({
       state.miniBackCollection = action.payload.map((el) => {
         const miniback = state.miniBackCollection.find(item => item.id === el.id)
         if (miniback)  {
+          if (el.deployState !== MiniBackState.UNDEPLOYED) {
+            miniback.isLoading = false
+          }
+
           return miniback
         }
 
@@ -39,7 +43,6 @@ const miniBackSlice = createSlice({
     },
 
     deleteMiniBackItem: (state, action: PayloadAction<{ id: string }>) => {
-      console.log(action.payload.id);
       state.miniBackCollection = state.miniBackCollection.filter(
         (item) => item.id !== action.payload.id
       );
