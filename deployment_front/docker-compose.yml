@@ -1,0 +1,11 @@
+version: "3.1"
+
+services:
+  client:
+    container_name: deployment-server-client
+    build: ./
+    env_file:
+      - ./.env
+    ports:
+      - ${PORT}:${PORT}
+    restart: always

@@ -1,0 +1,12 @@
+export enum DeployStatus {
+  START = 0,
+  PREPARING = 0.1,
+  CHECK_CONNECTION = 0.2,
+  PUT_DIRECTORY = 0.3,
+  PUT_KEY = 0.5,
+  PULL_DOCKER = 0.6,
+  PULL_MINIBACK = 0.8,
+  RUN_MINIBACK = 0.9,
+  UPDATE_STATUS = 0.95,
+  FINISH = 1,
+}
