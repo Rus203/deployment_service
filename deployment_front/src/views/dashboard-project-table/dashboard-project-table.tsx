@@ -6,7 +6,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useLayoutEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import TableItemProject from './table-item-project/table-item-project'
 import { Container, ControlButtons, FixedTable, LinkToDeploy, SpinBlock } from './table.styles'
@@ -25,7 +25,7 @@ const DashBoardProjectTable: FC = () => {
   const dispatch = useAppDispatch()
   const projects = useAppSelector(state => state.project.projectCollection)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (miniBack) {
       setLoading(true)
       const { port, serverUrl } = miniBack

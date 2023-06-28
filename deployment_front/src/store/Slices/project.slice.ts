@@ -27,7 +27,14 @@ const projectSlice = createSlice({
         const project = state.projectCollection.find(item => item.id === el.id)
         if (project) {
           if (el.state !== ProjectState.UNDEPLOYED) {
-            project.isLoading = false
+            return {
+              ...el,
+              miniBackId: action.payload.miniBackId,
+              error: false,
+              success: false,
+              isLoading: false,
+              loadingAmount: 0,
+            }
           }
 
           return project

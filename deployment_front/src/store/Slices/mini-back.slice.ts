@@ -26,7 +26,13 @@ const miniBackSlice = createSlice({
         const miniback = state.miniBackCollection.find(item => item.id === el.id)
         if (miniback)  {
           if (el.deployState !== MiniBackState.UNDEPLOYED) {
-            miniback.isLoading = false
+            return {
+              ...el,
+              error: false,
+              success: false,
+              isLoading: false,
+              loadingAmount: 0,
+            }
           }
 
           return miniback
