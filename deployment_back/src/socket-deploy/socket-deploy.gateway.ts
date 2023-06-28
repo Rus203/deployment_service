@@ -45,6 +45,7 @@ export class SocketDeployGateway {
         this.server.emit(`finish-delete-mini-back-${dto.id}`);
       })
       .catch((error) => {
+        console.log(error);
         this.server.emit(`error-${dto.id}`, error.message);
       });
   }
