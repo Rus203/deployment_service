@@ -1,14 +1,11 @@
 /deployment_back/node_modules
 /deployment_back/dist
-/deployment_back/mini-back-key
 /deployment_back/uploads
+/deployment_back/.env
 
 /deployment_front/node_modules
 /deployment_front/dist
-
-/mini_back/node_modules
-/mini_back/dist
-/mini_back/*.env
+/deployment_front/.env
 
 
 # IDE - VSCode
@@ -17,3 +14,4 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+deployment_back/.env

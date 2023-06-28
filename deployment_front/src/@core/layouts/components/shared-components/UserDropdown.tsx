@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography'
 import LogoutVariant from 'mdi-material-ui/LogoutVariant'
 
 import Link from '../../../../Components/Link/LInk'
-import { logOut } from '../../../../store/features'
+import { logOut } from '../../../../store/Slices'
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 import { capitalizeFirstLowercaseRest } from '../../../../utils/upper-first-letter'
 
@@ -33,7 +33,7 @@ const BadgeContentSpan = styled('span')(({ theme }) => ({
 
 const UserDropdown = () => {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-  const { name, email } = useAppSelector(state => state.auth)
+  const account = useAppSelector(state => state.auth?.account)
   const dispatch = useAppDispatch()
 
 
@@ -51,7 +51,7 @@ const UserDropdown = () => {
     dispatch(logOut());
   }
 
-  return (
+  return account === null ? null : (
     <Fragment>
       <Badge
         overlap='circular'
@@ -61,7 +61,7 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Avatar
-          alt={name}
+          alt={account.name}
           onClick={handleDropdownOpen}
           sx={{ width: 40, height: 40 }}
           src='/images/avatars/1.png'
@@ -82,12 +82,12 @@ const UserDropdown = () => {
               badgeContent={<BadgeContentSpan />}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-              <Avatar alt={name} src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
+              <Avatar alt={account.name} src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>{capitalizeFirstLowercaseRest(name)}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{capitalizeFirstLowercaseRest(account.name)}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                {capitalizeFirstLowercaseRest(email)}
+                {capitalizeFirstLowercaseRest(account.email)}
               </Typography>
             </Box>
           </Box>

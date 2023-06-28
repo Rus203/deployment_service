@@ -20,8 +20,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Alert from "../../Components/Alert";
 import Link from "../../Components/Link/LInk";
-import { useRegisterUserMutation } from "../../services";
 import { BoxStyled } from "./register.styles";
+import axios from '../../utils/axios.instance';
 
 const Card = styled(MuiCard)<CardProps>(({ theme }) => ({
   [theme.breakpoints.up("sm")]: { width: "28rem" },
@@ -42,8 +42,6 @@ const Register: FC = () => {
   const [isShowAlert, setShowAlert] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [registerUser] = useRegisterUserMutation();
-
 
   const [values, setValues] = useState<State>({
     password: "",
@@ -55,14 +53,14 @@ const Register: FC = () => {
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      await registerUser(data).unwrap();
-      navigate("/");
-    } catch (error: any) {
-      console.log(error);
-      setShowAlert(true);
-      setErrorMessage(error.data.message);
-    }
+    axios.post('auth/sign-up', data)
+      .then(res => {
+        navigate('/login')
+      })
+      .catch(error => {
+        setShowAlert(true)
+        setErrorMessage(error.response.data.message)
+      });
   };
 
   const handleClickShowPassword = () => {
@@ -72,7 +70,7 @@ const Register: FC = () => {
 
   useEffect(() => {
     if (isShowAlert) {
-      const timerId = setTimeout(() => setShowAlert(false), 3000);
+      const timerId = setTimeout(() => setShowAlert(false), 5000);
       return () => clearTimeout(timerId);
     }
   }, [isShowAlert])

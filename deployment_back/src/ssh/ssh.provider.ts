@@ -2,10 +2,17 @@ import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { Injectable } from '@nestjs/common';
 import { ChildProcessCommandProvider } from 'src/utils';
+import { Client } from 'ssh2';
 
 export interface ISshConnectionOptions {
   sshLink: string;
   pathToSSHPrivateKey: string;
+}
+
+export interface ISshTestConnection {
+  pathToSSHPrivateKey: string;
+  userName: string;
+  serverUrl: string;
 }
 
 @Injectable()
@@ -129,6 +136,87 @@ export class SshProvider extends ChildProcessCommandProvider {
       );
 
       this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
+
+  pullDocker(
+    { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    nameRemoteRepository: string,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const childProcess = spawn(
+        'ssh',
+        [
+          '-T',
+          sshLink,
+          '-i',
+          pathToSSHPrivateKey,
+          `"sudo ~/${nameRemoteRepository}/pull-docker.script.sh"`,
+        ],
+        {
+          shell: true,
+        },
+      );
+
+      this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
+
+  putFileInDir(
+    { sshLink, pathToSSHPrivateKey }: ISshConnectionOptions,
+    localFilePath: string,
+    remoteFilePath: string,
+  ): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const childProcess = spawn('scp', [
+        '-i',
+        pathToSSHPrivateKey,
+        '-o StrictHostKeyChecking=no',
+        localFilePath,
+        `${sshLink}:${remoteFilePath}`,
+      ]);
+
+      childProcess.on('error', (error) => {
+        reject(error);
+      });
+
+      childProcess.on('exit', (code) => {
+        if (code === 0) {
+          resolve(true);
+        } else {
+          reject(new Error(`SCP process exited with code ${code}`));
+        }
+      });
+
+      this.handleProcessErrors(childProcess, resolve, reject);
+    });
+  }
+
+  testSshConnection({
+    pathToSSHPrivateKey,
+    userName,
+    serverUrl,
+  }: ISshTestConnection): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const conn = new Client();
+
+      conn.on('ready', () => {
+        conn.end();
+        resolve(true);
+      });
+
+      conn.on('error', (err) => {
+        console.log('connection error', err);
+        conn.end();
+        reject(err);
+      });
+
+      conn.connect({
+        host: serverUrl,
+        port: 22,
+        username: userName,
+        privateKey: fs.readFileSync(pathToSSHPrivateKey),
+      });
     });
   }
 }

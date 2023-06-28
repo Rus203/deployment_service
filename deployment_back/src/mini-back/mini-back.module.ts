@@ -5,14 +5,14 @@ import { FileEncryptorModule } from 'src/file-encryptor/files-encryptor.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MiniBack } from './mini-back.entity';
 import { MiniBackController } from './mini-back.controller';
-import { StatusDeployModule } from 'src/status-deploy/status-deploy.module';
+import { SocketProgressModule } from '../socket-progress/socket-progress.module';
 
 @Module({
   imports: [
     SSHModule,
     FileEncryptorModule,
     TypeOrmModule.forFeature([MiniBack]),
-    StatusDeployModule,
+    SocketProgressModule,
   ],
   providers: [MiniBackService],
   exports: [MiniBackService],

@@ -51,3 +51,7 @@ export const Instance = styled('div')`
   border-radius: 5px;
   margin-bottom: 30px;
 `;
+
+export const SpinBlock = styled.div`
+  height: 40vh;
+`

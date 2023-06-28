@@ -12,7 +12,7 @@ const Spinner = ({ typeOfMessages }: IProps) => {
     <Container>
       {typeOfMessages && <Progress eventType={typeOfMessages} />}
       <Wrapper>
-        <ChasingDots />
+        <ChasingDots  size={40} color="black"/>
       </Wrapper>
     </Container>
   );
