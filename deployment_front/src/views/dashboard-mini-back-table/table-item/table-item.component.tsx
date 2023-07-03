@@ -46,7 +46,6 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
       })
 
       socketInstance?.on(`progress-deploy-mini-back-${row.id}`, data => {
-        console.log('progress-deploy-mini-back', data)
         dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: data }))
       })
 
@@ -89,14 +88,6 @@ const TableItem: FC<Props> = ({ row, index, followToProjects }) => {
     dispatch(setLoadingMiniBack({ miniBackId: row.id, loadingAmount: 0 }))
     socket?.emit(`deploy-miniback`, { id: row.id })
   }
-
-  useEffect(() => {
-    if (isShowAlert) {
-      const timerId = setTimeout(() => setIsShowAlert(false), 3000);
-      return () => clearTimeout(timerId);
-    }
-  }, [isShowAlert])
-
 
   return (
 
