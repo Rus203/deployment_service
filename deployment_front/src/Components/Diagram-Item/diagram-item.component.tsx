@@ -46,6 +46,7 @@ const DiagramItem: FC<IProps> = ({ miniback }) => {
         setServers(data)
       })
 
+      return () => { socket.disconnect() }
     }
   }, [miniback])
 
