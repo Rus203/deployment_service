@@ -50,4 +50,7 @@ export class MiniBack {
 
   @Column({ name: 'user_name' })
   userName: string;
+
+  @Column({ name: 'env_file_path', length: 255 })
+  envFilePath: string;
 }
