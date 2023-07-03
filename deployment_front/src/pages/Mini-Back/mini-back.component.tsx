@@ -26,6 +26,7 @@ interface IMiniBackInputs {
   name: string,
   sshConnectionString: string,
   sshServerPrivateKey: FileList,
+  envFile: FileList
 }
 
 export const MiniBack: FC = () => {
@@ -38,6 +39,7 @@ export const MiniBack: FC = () => {
   const navigate = useNavigate();
 
   const sshServerPrivateKey = watch('sshServerPrivateKey');
+  const envFile = watch('envFile');
 
   useEffect(() => {
     axios.get('mini-back').then(res => {
@@ -51,6 +53,7 @@ export const MiniBack: FC = () => {
     formData.append('name', data.name)
     formData.append('sshConnectionString', data.sshConnectionString)
     formData.append('sshServerPrivateKey', data.sshServerPrivateKey[0])
+    formData.append('envFile', data.envFile[0])
 
     setLoading(true)
     axios.post('mini-back', formData)
@@ -140,6 +143,35 @@ export const MiniBack: FC = () => {
                   )}
                 {errors.sshServerPrivateKey && <FormHelperText>
                   {errors.sshServerPrivateKey.message}
+                </FormHelperText>
+                }
+              </FormControl>
+            </SectionInputs>
+            <SectionHeader>Mini-back data</SectionHeader>
+            <SectionInputs>
+              <FormControl>
+                <Button
+                  component="label"
+                  variant="outlined"
+                >
+                  env file
+                  <FileInput
+                    id="envFile"
+                    type="file"
+                    style={{ display: "none" }}
+                    {...register('envFile', {
+                      required: 'env file is required'
+                    })}
+                  />
+                </Button>
+                {!errors.envFile?.message && envFile &&
+                  !!envFile.length && (
+                    <FormHelperText>
+                      File: {envFile[0].name}
+                    </FormHelperText>
+                  )}
+                {errors.envFile && <FormHelperText>
+                  {errors.envFile.message}
                 </FormHelperText>
                 }
               </FormControl>
