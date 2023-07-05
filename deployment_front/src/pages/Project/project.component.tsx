@@ -78,7 +78,7 @@ export const Project: FC = () => {
     navigate(`/mini-back/${miniBackId}`)
   }
 
-  return loading ? <Spinner typeOfMessages={null} /> : (
+  return loading ? <Spinner /> : (
     <Container>
       <FormContainer>
         <ProjectOptionsContainer>

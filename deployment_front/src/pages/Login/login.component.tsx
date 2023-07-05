@@ -72,7 +72,7 @@ const Login: FC = () => {
 
   useEffect(() => {
     if (isShowAlert) {
-      const timerId = setTimeout(() => setShowAlert(false), 3000);
+      const timerId = setTimeout(() => setShowAlert(false), 10000);
       return () => clearTimeout(timerId);
     }
   }, [isShowAlert])

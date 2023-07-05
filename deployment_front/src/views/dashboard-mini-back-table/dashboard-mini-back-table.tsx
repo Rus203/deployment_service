@@ -51,7 +51,7 @@ const DashBoardMiniBackTable: FC = () => {
       <Card>
         <TableContainer>
           <FixedTable>
-            { loading ? <SpinBlock><Spinner typeOfMessages={null} /></SpinBlock> : (
+            { loading ? <SpinBlock><Spinner /></SpinBlock> : (
               <Table sx={{ minWidth: 800 }} aria-label='table in dashboard'>
                 <TableHead>
                   <TableRow>

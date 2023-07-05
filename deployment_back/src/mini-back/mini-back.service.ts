@@ -50,6 +50,7 @@ export class MiniBackService implements OnApplicationBootstrap {
         sshServerPrivateKeyPath,
         nameRemoteRepository,
         sshConnectionString,
+        envFilePath,
         ...rest
       } = instance;
       return rest;
@@ -65,6 +66,7 @@ export class MiniBackService implements OnApplicationBootstrap {
   async create(
     dto: CreateMiniBackDto & {
       sshServerPrivateKeyPath: string;
+      envFilePath: string;
       userId: string;
     },
   ) {
@@ -83,9 +85,12 @@ export class MiniBackService implements OnApplicationBootstrap {
     dto.name = normalizeProjectName(dto.name);
     await this.fileEncryptorProvider.encryptFilesOnPlace([
       dto.sshServerPrivateKeyPath,
+      dto.envFilePath,
     ]);
 
     dto.sshServerPrivateKeyPath = dto.sshServerPrivateKeyPath + '.enc';
+    dto.envFilePath = dto.envFilePath + '.enc';
+
     const instance = this.miniBackRepository.create({
       ...dto,
       port,
@@ -96,6 +101,7 @@ export class MiniBackService implements OnApplicationBootstrap {
       sshServerPrivateKeyPath,
       nameRemoteRepository,
       sshConnectionString,
+      envFilePath,
       ...rest
     } = await this.miniBackRepository.save({
       ...instance,
@@ -123,6 +129,11 @@ export class MiniBackService implements OnApplicationBootstrap {
       if (existsSync(currentMiniBack.sshServerPrivateKeyPath)) {
         fs.unlink(currentMiniBack.sshServerPrivateKeyPath);
       }
+
+      if (existsSync(currentMiniBack.envFilePath)) {
+        fs.unlink(currentMiniBack.envFilePath);
+      }
+
       this.socket.emitDeleteStatus(DeleteStatus.FINISH, currentMiniBack.id);
     }
   }
@@ -142,8 +153,12 @@ export class MiniBackService implements OnApplicationBootstrap {
     }
 
     // eslint-disable-next-line prefer-const
-    let { sshConnectionString, sshServerPrivateKeyPath, nameRemoteRepository } =
-      currentMiniBack;
+    const {
+      sshConnectionString,
+      sshServerPrivateKeyPath,
+      nameRemoteRepository,
+      envFilePath,
+    } = currentMiniBack;
     const gitProjectLink = process.env.GIT_MINI_BACK_LINK;
 
     const miniBackPrivateKey = join(
@@ -158,13 +173,16 @@ export class MiniBackService implements OnApplicationBootstrap {
 
     let tempMiniBackPrivateKeyPath = await makeCopyFile(miniBackPrivateKey);
     let tempSshFilePrivateKeyPath = await makeCopyFile(sshServerPrivateKeyPath);
+    let tempEnvFilePath = await makeCopyFile(envFilePath);
 
     await this.fileEncryptorProvider.decryptFilesOnPlace([
       tempMiniBackPrivateKeyPath,
       tempSshFilePrivateKeyPath,
+      tempEnvFilePath,
     ]);
 
     tempSshFilePrivateKeyPath = tempSshFilePrivateKeyPath.replace(/.enc$/, '');
+    tempEnvFilePath = tempEnvFilePath.replace(/.enc$/, '');
     tempMiniBackPrivateKeyPath = tempMiniBackPrivateKeyPath.replace(
       /.enc$/,
       '',
@@ -240,6 +258,17 @@ export class MiniBackService implements OnApplicationBootstrap {
         currentMiniBack.id,
       );
 
+      await this.sshProvider.putFileInDir(
+        {
+          sshLink: sshConnectionString,
+          pathToSSHPrivateKey: tempSshFilePrivateKeyPath,
+        },
+        tempEnvFilePath,
+        join(`${nameRemoteRepository}`, 'mini-back', '.env'),
+      );
+
+      this.socket.emitDeployStatus(DeployStatus.PUT_ENV, currentMiniBack.id);
+
       await this.sshProvider.runMiniBack(
         {
           sshLink: sshConnectionString,
@@ -268,15 +297,20 @@ export class MiniBackService implements OnApplicationBootstrap {
         { deployState: MiniBackState.FAILED },
       );
 
+      console.log(error);
       if (typeof error === 'string') {
         throw new Error(error);
       }
 
       throw error;
     } finally {
-      await this.fileEncryptorProvider.encryptFilesOnPlace(
-        tempSshFilePrivateKeyPath,
-      );
+      if (existsSync(tempSshFilePrivateKeyPath)) {
+        fs.unlink(tempSshFilePrivateKeyPath);
+      }
+
+      if (existsSync(tempEnvFilePath)) {
+        fs.unlink(tempEnvFilePath);
+      }
 
       if (existsSync(tempMiniBackPrivateKeyPath)) {
         fs.unlink(tempMiniBackPrivateKeyPath);

@@ -1,13 +1,8 @@
 import Spinner from "./spinner.component";
+import React from 'react';
 
-import { MessageEvent } from "../../hooks";
-
-interface IProps {
-  typeOfMessages: MessageEvent | null;
-}
-
-const Component = ({ typeOfMessages }: IProps) => {
-  return <Spinner typeOfMessages={typeOfMessages} />;
+const Component: React.FC = () => {
+  return <Spinner />;
 };
 
 export default Component;

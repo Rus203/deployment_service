@@ -83,7 +83,6 @@ const miniBackSlice = createSlice({
     },
 
     successMiniBackLoading: (state, action: PayloadAction<{ id: string }>) => {
-      console.log(action.payload.id);
       state.miniBackCollection = state.miniBackCollection.map((value) => {
         if (value.id === action.payload.id) {
           return {

@@ -5,13 +5,15 @@ import { ProjectState } from '../../../utils/project-state.enum';
 import io, { Socket } from 'socket.io-client'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import Alert from '../../../Components/Alert';
-import CircularStatic from '../../../Components/CircularProgressWithLabel/circular-progress-with-label.component';
+import CircularStatic from '../../../Components/Circular-Progress-With-Label/circular-progress-with-label.component';
 import {
   deleteProjectItem,
   rejectProjectLoading,
   setProjectStatus,
   setLoadingAmount,
-  successProjectLoading } from '../../../store/Slices/project.slice';
+  successProjectLoading
+} from '../../../store/Slices/project.slice';
+import { addInfo } from '../../../store/Slices';
 
 interface Props {
   index: number,
@@ -106,10 +108,22 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
           <>
             <Button
               variant='outlined'
+              onClick={() => { dispatch(addInfo(serverUrl))}}
+              disabled={project.state === ProjectState.UNDEPLOYED
+                || project.state === ProjectState.FAILED}
+            >
+              Check path
+            </Button>
+
+            <Button
+              variant='outlined'
               disabled={project.state === ProjectState.DEPLOYED
                 || project.state === ProjectState.FAILED}
               onClick={handleDeploy}
-            >Deploy</Button>
+            >
+              Deploy
+            </Button>
+
             <Button
               onClick={handleDelete}
               variant='outlined'
@@ -125,7 +139,6 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
             : null
           }
       </TableRow>
-
   );
 };
 
