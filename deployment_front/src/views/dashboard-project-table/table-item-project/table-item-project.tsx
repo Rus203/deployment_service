@@ -108,6 +108,7 @@ const TableItemProject: FC<Props> = ({ index, project, serverUrl, port }) => {
           <>
             <Button
               variant='outlined'
+              color='success'
               onClick={() => { dispatch(addInfo(serverUrl))}}
               disabled={project.state === ProjectState.UNDEPLOYED
                 || project.state === ProjectState.FAILED}
