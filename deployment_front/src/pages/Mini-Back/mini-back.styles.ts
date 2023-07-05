@@ -46,17 +46,16 @@ export const FileInput = styled.input.attrs({
 `;
 
 export const Section = styled.div`
-  & + & {
-    margin-top: 20px;
-  }
+  margin-bottom: 20px;
 `;
 
 export const SectionHeader = styled.h3`
-  margin: 0 0 5px 0;
+  margin: 10px 0;
   padding: 0;
 `;
 
 export const SectionInputs = styled.div`
+  margin-bottom: 30px;
   display: flex;
   gap: 20px;
   align-items: center;

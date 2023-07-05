@@ -12,18 +12,20 @@ import {
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 
-import { authReducer, miniBackReducer, projectReducer } from './Slices'
+import { authReducer, miniBackReducer, projectReducer, healthReducer } from './Slices'
 
 const persistConfig = {
   key: 'root',
   version: 1,
   storage,
+  blacklist: [healthReducer.name]
 }
 
 const rootReducer = combineReducers({
   auth: authReducer,
   miniBack: miniBackReducer,
-  project: projectReducer
+  project: projectReducer,
+  health: healthReducer
 })
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 

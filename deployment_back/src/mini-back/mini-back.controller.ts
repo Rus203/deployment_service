@@ -73,7 +73,12 @@ export class MiniBackController {
   @ApiBody({
     schema: {
       type: 'object',
-      required: ['name', 'sshConnectionString', 'sshServerPrivateKey'],
+      required: [
+        'name',
+        'sshConnectionString',
+        'sshServerPrivateKey',
+        'envFile',
+      ],
       properties: {
         name: {
           type: 'string',
@@ -87,12 +92,20 @@ export class MiniBackController {
           type: 'file',
           format: 'binary',
         },
+
+        envFile: {
+          type: 'file',
+          format: 'binary',
+        },
       },
     },
   })
   @Post()
   @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'sshServerPrivateKey' }], { storage }),
+    FileFieldsInterceptor(
+      [{ name: 'sshServerPrivateKey' }, { name: 'envFile' }],
+      { storage },
+    ),
   )
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: GetMiniBackResponseDto })
@@ -100,14 +113,22 @@ export class MiniBackController {
     @Body() dto: CreateMiniBackDto,
     @Req() req: Request & { user: User },
     @UploadedFiles()
-    { sshServerPrivateKey }: { sshServerPrivateKey?: Express.Multer.File[] },
+    {
+      sshServerPrivateKey,
+      envFile,
+    }: {
+      sshServerPrivateKey?: Express.Multer.File[];
+      envFile?: Express.Multer.File[];
+    },
   ) {
     const sshServerPrivateKeyPath = sshServerPrivateKey[0].path;
+    const envFilePath = envFile[0].path;
     const userId = req.user.id;
     return await this.miniBackService.create({
       ...dto,
       userId,
       sshServerPrivateKeyPath,
+      envFilePath,
     });
   }
 }
