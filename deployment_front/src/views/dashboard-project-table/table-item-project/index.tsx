@@ -7,7 +7,7 @@ type Props = {
   index: number,
   project: IProject,
   serverUrl: string,
-  port: number
+  port: number,
 }
 
 const Component: React.FC<Props> = ({ index, project, serverUrl, port }) => {

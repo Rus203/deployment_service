@@ -72,7 +72,7 @@ export const MiniBack: FC = () => {
     navigate('/');
   }
 
-  return loading ? <Spinner typeOfMessages={null} /> : (
+  return loading ? <Spinner /> : (
     <Container>
       <FormContainer>
         <ProjectOptionsContainer>

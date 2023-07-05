@@ -1,16 +1,10 @@
 import { ChasingDots } from "styled-spinkit";
 import { Container, Wrapper } from "./spinner.styles";
-import { MessageEvent } from "../../hooks";
-import { Progress } from "../Progress";
+import React from 'react';
 
-interface IProps {
-  typeOfMessages: MessageEvent | null;
-}
-
-const Spinner = ({ typeOfMessages }: IProps) => {
+const Spinner: React.FC = () => {
   return (
     <Container>
-      {typeOfMessages && <Progress eventType={typeOfMessages} />}
       <Wrapper>
         <ChasingDots  size={40} color="black"/>
       </Wrapper>

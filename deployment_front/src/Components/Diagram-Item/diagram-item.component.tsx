@@ -50,7 +50,7 @@ const DiagramItem: FC<IProps> = ({ miniback }) => {
     }
   }, [miniback])
 
-  return !servers ? <SpinBlock><Spinner typeOfMessages={null}/></SpinBlock> : (
+  return !servers ? <SpinBlock><Spinner /></SpinBlock> : (
     <Instance>
       <SectionName>{capitalizeFirstLowercaseRest(miniback.name)}</SectionName>
       <Section>

@@ -32,7 +32,7 @@ const ProjectStats: FC<ProjectStatsProps> = ({
   return (
     <Container>
       {isLoading ? (
-        <Spinner typeOfMessages={null} />
+        <Spinner />
       ) : (
         <div>
           <StatHeader>

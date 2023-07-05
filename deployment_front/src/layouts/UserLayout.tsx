@@ -32,7 +32,7 @@ const UserLayout: FC = () => {
       />
     )}
   >
-    <Suspense fallback={<Spinner typeOfMessages={null}/>}>
+    <Suspense fallback={<Spinner />}>
       <Outlet />
     </Suspense>
   </VerticalLayout>
